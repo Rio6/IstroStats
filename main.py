@@ -5,18 +5,13 @@ import threading
 import time
 import code
 
+from wsgiref.simple_server import make_server
 from tg import expose, TGController, MinimalApplicationConfigurator
 from tg.configurator.components.sqlalchemy import SQLAlchemyConfigurationComponent
 from tg.util import Bunch
 
-from sqlalchemy import MetaData, Column, Integer, DateTime, String, Boolean
-from sqlalchemy.orm import scoped_session, sessionmaker
-from sqlalchemy.schema import Table
-from sqlalchemy.ext.declarative import declarative_base
-
-from wsgiref.simple_server import make_server
-
 from istro_listener import IstroListener
+from models import *
 
 dbSession = scoped_session(sessionmaker(autoflush=True, autocommit=False))
 dbMetadata = MetaData()
