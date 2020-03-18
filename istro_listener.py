@@ -1,11 +1,14 @@
 import time
+import json
 import websocket
+from pymitter import EventEmitter
 
 def _class_cb(method):
     return lambda *args: method(*args)
 
-class IstroListener:
+class IstroListener(EventEmitter):
     def __init__(self, root_address="ws://198.199.109.223:88"):
+        super().__init__()
         self.root_address = root_address
         self.closed = False
 
@@ -27,10 +30,15 @@ class IstroListener:
         ws.send('["registerBot"]')
 
     def on_message(self, ws, msg):
-        print(msg)
+        data = json.loads(msg);
+        if len(data) == 1 and len(data[0]) == 1 and 'serverName' in data[0][0]:
+            self.emit('gameReport', data[0][0])
+        else:
+            self.emit(data[0], *data[1:]);
+
 
     def on_error(self, ws, err):
-        print(err)
+        print("Error: " + err)
 
     def on_close(self, ws):
         if not self.closed:
