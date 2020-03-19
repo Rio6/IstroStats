@@ -3,41 +3,48 @@
 import signal
 import threading
 import time
+import datetime
 import code
 import cherrypy
 
 import istrolid
 import models
-from models import PlayerModel, MatchModel, MatchPlayerModel
 
-@cherrypy.popargs('hi')
-class TestController:
+istro = istrolid.Istrolid()
+
+def timeFieldToEpoch(data):
+    if data is None: return None
+    for k,v in data.items():
+        if isinstance(v, datetime.datetime):
+            data[k] = v.timestamp()
+    return data
+
+@cherrypy.popargs('playerId')
+class PlayerCtl:
     @cherrypy.expose
     @cherrypy.tools.json_out()
-    def index(self, hi):
-        return {'abc': hi}
+    def index(self, playerId=None):
+        return timeFieldToEpoch(istro.getPlayerInfo(int(playerId)))
 
-class RootController:
-    def __init__(self, istro):
-        self.istro = istro
-        self.test = TestController()
+class RootCtl:
+    def __init__(self):
+        self.player = PlayerCtl()
 
     @cherrypy.expose()
     def index(self):
-        return f"""
-        {[(s.name, s.observers, s.state, str(s.runningSince), s.type, s.hidden, [(p.name, p.side, p.ai) for p in s.players]) for s in self.istro.servers.values()]}
-        {[(p.name, p.mode, str(p.logonTime)) for p in self.istro.onlinePlayers.values()]}
-         """
+        return "hello"
 
 def main():
+
+    models.init()
+
     # istro listener in another thread
-    istro = istrolid.Istrolid()
     istroThread = threading.Thread(target=istro.start)
     cherrypy.engine.subscribe('start', istroThread.start)
     cherrypy.engine.subscribe('exit', istro.stop)
     
     # web server
-    cherrypy.quickstart(RootController(istro), '/', {
+    cherrypy.quickstart(RootCtl(), '/', {
         'global': {
             'server.socket_port': 8000,
         }

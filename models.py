@@ -3,10 +3,12 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.schema import Table
 from sqlalchemy.ext.declarative import declarative_base
 
+DATABASE_URL='sqlite:///database.db?check_same_thread=False'
+
 DeclarativeBase = declarative_base()
 
-dbEngine = create_engine('sqlite:///database.db')
-dbSession = scoped_session(sessionmaker(bind=dbEngine, autoflush=True, autocommit=False))
+engine = None
+session = None
 
 class PlayerModel(DeclarativeBase):
     __tablename__ = 'players'
@@ -14,8 +16,11 @@ class PlayerModel(DeclarativeBase):
     id = Column(Integer, primary_key=True)
     name = Column(String(18), index=True, nullable=False)
     rank = Column(Integer, default=0)
-    ai = Column(Boolean, default=False)
     lastActive = Column(DateTime)
+
+    # in-memory fields
+    mode = None
+    logonTime = None
 
 class MatchModel(DeclarativeBase):
     __tablename__ = 'matches'
@@ -36,12 +41,16 @@ class MatchPlayerModel(DeclarativeBase):
 
 # https://stackoverflow.com/a/6078058/6023997
 def get_or_create(model, **kwargs):
-    instance = dbSession.query(model).filter_by(**kwargs).first()
+    instance = session.query(model).filter_by(**kwargs).first()
     if instance:
         return instance
     else:
         instance = model(**kwargs)
-        dbSession.add(instance)
+        session.add(instance)
         return instance
 
-DeclarativeBase.metadata.create_all(dbEngine)
+def init():
+    global engine, session
+    engine = create_engine(DATABASE_URL)
+    session = scoped_session(sessionmaker(bind=engine, autoflush=True, autocommit=False))
+    DeclarativeBase.metadata.create_all(engine)

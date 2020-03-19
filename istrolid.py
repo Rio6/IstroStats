@@ -4,12 +4,6 @@ import models
 from models import PlayerModel, MatchModel, MatchPlayerModel
 from istro_listener import IstroListener
 
-class OnlinePlayer:
-    def __init__(self, name):
-        self.name = name
-        self.mode = None
-        self.logonTime = datetime.utcnow()
-
 class Server:
     class Player:
         def __init__(self, name, side, ai=False):
@@ -47,6 +41,23 @@ class Istrolid:
     def stop(self):
         self.listener.close()
 
+    def getPlayerInfo(self, id):
+        if id in self.onlinePlayers:
+            player = self.onlinePlayers[id]
+        else:
+            player = models.session.query(PlayerModel).filter_by(id=id).one_or_none()
+
+        if player is None: return None
+
+        return {
+            'id': id,
+            'name': player.name,
+            'rank': player.rank,
+            'mode': player.mode,
+            'logonTime': player.logonTime,
+            'lastActive': player.lastActive,
+        }
+
     def _onPlayers(self, players):
         self.fullPlayers = True
         self._onPlayersDiff(players)
@@ -66,17 +77,18 @@ class Istrolid:
     def _onPlayersDiff(self, diff):
         for name, player in diff.items():
             if player is None:
-                self.onlinePlayers.pop(name, None)
+                playerId = self._getPlayer(name, False).id
+                self.onlinePlayers.pop(playerId, None)
             else:
-                # in-memory data
-                oldPlayer = self._getPlayer(name)
-                oldPlayer.mode = player.get('mode', oldPlayer.mode)
+                oldPlayer = self._getPlayer(name, True)
 
                 # database data
-                dbPlayer = models.get_or_create(PlayerModel, name=name)
-                dbPlayer.rank = player.get('rank', dbPlayer.rank)
-                dbPlayer.lastActive = datetime.utcnow()
-                models.dbSession.commit()
+                oldPlayer.rank = player.get('rank', oldPlayer.rank)
+                oldPlayer.lastActive = datetime.utcnow()
+                models.session.commit()
+
+                # in-memory data
+                oldPlayer.mode = player.get('mode', oldPlayer.mode)
 
     def _onServersDiff(self, diff):
         for name, server in diff.items():
@@ -109,25 +121,33 @@ class Istrolid:
                 type = report['type'],
                 winningSide = report['winningSide'],
                 time = report['time'])
-            models.dbSession.add(match)
-            models.dbSession.commit()
+            models.session.add(match)
+            models.session.commit()
 
             for player in report['players']:
-                playerId = models.get_or_create(PlayerModel, name=player['name'], ai=player['ai']).id
-                models.dbSession.add(MatchPlayerModel(
+                if player.ai: continue
+                playerId = models.get_or_create(PlayerModel, name=player['name']).id
+                models.session.add(MatchPlayerModel(
                     matchId = match.id,
                     playerId = playerId,
                     winner = player['side'] == report['winningSide'],
                     side = player['side']))
-                models.dbSession.commit()
+                models.session.commit()
 
         except KeyError:
-            models.dbSession.rollback()
+            models.session.rollback()
 
-    def _getPlayer(self, name):
-        if name not in self.onlinePlayers:
-            self.onlinePlayers[name] = OnlinePlayer(name)
-        return self.onlinePlayers[name]
+    def _getPlayer(self, name, online=False):
+        player = next((p for p in self.onlinePlayers.values() if p.name == name), None)
+
+        if player is None:
+            player = models.get_or_create(PlayerModel, name=name)
+            player.logonTime = datetime.utcnow()
+            if online:
+                self.onlinePlayers[player.id] = player
+            return player
+
+        return self.onlinePlayers[player.id]
 
     def _getServer(self, name):
         if name not in self.servers:
