@@ -4,21 +4,25 @@ import signal
 import threading
 import time
 import code
-
-from wsgiref.simple_server import make_server
-from tg import expose, TGController, MinimalApplicationConfigurator
-from tg.configurator.components.sqlalchemy import SQLAlchemyConfigurationComponent
-from tg.util import Bunch
+import cherrypy
 
 import istrolid
 import models
 from models import PlayerModel, MatchModel, MatchPlayerModel
 
-class RootController(TGController):
+@cherrypy.popargs('hi')
+class TestController:
+    @cherrypy.expose
+    @cherrypy.tools.json_out()
+    def index(self, hi):
+        return {'abc': hi}
+
+class RootController:
     def __init__(self, istro):
         self.istro = istro
+        self.test = TestController()
 
-    @expose()
+    @cherrypy.expose()
     def index(self):
         return f"""
         {[(s.name, s.observers, s.state, str(s.runningSince), s.type, s.hidden, [(p.name, p.side, p.ai) for p in s.players]) for s in self.istro.servers.values()]}
@@ -26,35 +30,18 @@ class RootController(TGController):
          """
 
 def main():
-    # istro listener
+    # istro listener in another thread
     istro = istrolid.Istrolid()
-    signal.signal(signal.SIGINT, lambda *args: istro.stop())
-
-    # web server in other thread
-    config = MinimalApplicationConfigurator()
-    config.register(SQLAlchemyConfigurationComponent)
-    config.update_blueprint({
-        'root_controller': RootController(istro),
-        'use_sqlalchemy': True,
-        'sqlalchemy.url': 'sqlite:///database.db',
-        'model': Bunch(
-            DBSession=models.dbSession,
-            init_model=models.init_model
-        ),
+    istroThread = threading.Thread(target=istro.start)
+    cherrypy.engine.subscribe('start', istroThread.start)
+    cherrypy.engine.subscribe('exit', istro.stop)
+    
+    # web server
+    cherrypy.quickstart(RootController(istro), '/', {
+        'global': {
+            'server.socket_port': 8000,
+        }
     })
-
-    app = config.make_wsgi_app()
-    httpd = make_server('', 8000, app)
-    serverThread = threading.Thread(target=httpd.serve_forever)
-    serverThread.start()
-
-    # istrolid listener in main thread
-    istro.start()
-
-    print("Stopping")
-    httpd.shutdown()
-    serverThread.join()
-    httpd.server_close()
 
 if __name__ == '__main__':
     main()

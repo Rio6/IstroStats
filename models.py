@@ -1,11 +1,12 @@
-from sqlalchemy import MetaData, Column, Integer, DateTime, String, Boolean, Float
+from sqlalchemy import *
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.schema import Table
 from sqlalchemy.ext.declarative import declarative_base
 
-dbSession = scoped_session(sessionmaker(autoflush=True, autocommit=False))
-dbMetadata = MetaData()
-DeclarativeBase = declarative_base(metadata=dbMetadata)
+DeclarativeBase = declarative_base()
+
+dbEngine = create_engine('sqlite:///database.db')
+dbSession = scoped_session(sessionmaker(bind=dbEngine, autoflush=True, autocommit=False))
 
 class PlayerModel(DeclarativeBase):
     __tablename__ = 'players'
@@ -33,10 +34,6 @@ class MatchPlayerModel(DeclarativeBase):
     winner = Column(Boolean, nullable=False)
     side = Column(String(16))
 
-def init_model(engine):
-    dbSession.configure(bind=engine)
-    dbMetadata.create_all(engine)
-
 # https://stackoverflow.com/a/6078058/6023997
 def get_or_create(model, **kwargs):
     instance = dbSession.query(model).filter_by(**kwargs).first()
@@ -46,3 +43,5 @@ def get_or_create(model, **kwargs):
         instance = model(**kwargs)
         dbSession.add(instance)
         return instance
+
+DeclarativeBase.metadata.create_all(dbEngine)
