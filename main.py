@@ -19,16 +19,24 @@ def timeFieldToEpoch(data):
             data[k] = v.timestamp()
     return data
 
-@cherrypy.popargs('playerId')
+@cherrypy.popargs('name')
 class PlayerCtl:
     @cherrypy.expose
     @cherrypy.tools.json_out()
-    def index(self, playerId=None):
-        return timeFieldToEpoch(istro.getPlayerInfo(int(playerId)))
+    def index(self, name=None):
+        return timeFieldToEpoch(istro.getPlayerInfo(name))
+
+@cherrypy.popargs('name')
+class ServerCtl:
+    @cherrypy.expose
+    @cherrypy.tools.json_out()
+    def index(self, name=None):
+        return(timeFieldToEpoch(istro.getServerInfo(name)))
 
 class RootCtl:
     def __init__(self):
         self.player = PlayerCtl()
+        self.server = ServerCtl()
 
     @cherrypy.expose()
     def index(self):

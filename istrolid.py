@@ -41,21 +41,37 @@ class Istrolid:
     def stop(self):
         self.listener.close()
 
-    def getPlayerInfo(self, id):
-        if id in self.onlinePlayers:
-            player = self.onlinePlayers[id]
-        else:
-            player = models.session.query(PlayerModel).filter_by(id=id).one_or_none()
+    def getPlayerInfo(self, name):
+        player = self._getPlayer(name, online=False)
 
         if player is None: return None
-
         return {
-            'id': id,
+            'id': player.id,
             'name': player.name,
             'rank': player.rank,
+            'faction': player.faction,
             'mode': player.mode,
+            'ai': player.ai,
             'logonTime': player.logonTime,
             'lastActive': player.lastActive,
+        }
+
+    def getServerInfo(self, name):
+        server = self._getServer(name, False)
+
+        if server is None: return None
+        return {
+            'name': server.name,
+            'players': [{
+                'name': p.name,
+                'side': p.side,
+                'ai': p.ai
+            } for p in server.players],
+            'observers': server.observers,
+            'type': server.type,
+            'state': server.state,
+            'hidden': server.hidden,
+            'runningSince': server.runningSince
         }
 
     def _onPlayers(self, players):
@@ -77,13 +93,14 @@ class Istrolid:
     def _onPlayersDiff(self, diff):
         for name, player in diff.items():
             if player is None:
-                playerId = self._getPlayer(name, False).id
+                playerId = self._getPlayer(name, online=False).id
                 self.onlinePlayers.pop(playerId, None)
             else:
-                oldPlayer = self._getPlayer(name, True)
+                oldPlayer = self._getPlayer(name, online=True, create=True)
 
                 # database data
                 oldPlayer.rank = player.get('rank', oldPlayer.rank)
+                oldPlayer.faction = player.get('faction', oldPlayer.faction)
                 oldPlayer.lastActive = datetime.utcnow()
                 models.session.commit()
 
@@ -95,7 +112,7 @@ class Istrolid:
             if server is None:
                 self.servers.pop(name, None)
             else:
-                oldServer = self._getServer(name)
+                oldServer = self._getServer(name, True)
                 if 'players' in server:
                     oldServer.players = [
                         Server.Player(p.get('name'), p.get('side'), p.get('ai')) for p in server['players']
@@ -125,8 +142,7 @@ class Istrolid:
             models.session.commit()
 
             for player in report['players']:
-                if player.ai: continue
-                playerId = models.get_or_create(PlayerModel, name=player['name']).id
+                playerId = self._getPlayer(player['name'], player['ai'], online=False, create=True).id
                 models.session.add(MatchPlayerModel(
                     matchId = match.id,
                     playerId = playerId,
@@ -137,19 +153,28 @@ class Istrolid:
         except KeyError:
             models.session.rollback()
 
-    def _getPlayer(self, name, online=False):
-        player = next((p for p in self.onlinePlayers.values() if p.name == name), None)
+    def _getPlayer(self, name, ai=False, online=False, create=False):
+        player = next((p for p in self.onlinePlayers.values() if p.name == name and p.ai == ai), None)
 
         if player is None:
-            player = models.get_or_create(PlayerModel, name=name)
-            player.logonTime = datetime.utcnow()
+            if create:
+                player = models.get_or_create(PlayerModel, name=name, ai=ai)
+            else:
+                player = models.session.query(PlayerModel).filter_by(name=name, ai=ai).one_or_none()
+                if player is None: return None
+
             if online:
+                player.logonTime = datetime.utcnow()
                 self.onlinePlayers[player.id] = player
+
             return player
 
         return self.onlinePlayers[player.id]
 
-    def _getServer(self, name):
+    def _getServer(self, name, online=False):
         if name not in self.servers:
-            self.servers[name] = Server(name)
+            if online:
+                self.servers[name] = Server(name)
+            else:
+                return None
         return self.servers[name]

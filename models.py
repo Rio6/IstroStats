@@ -16,6 +16,8 @@ class PlayerModel(DeclarativeBase):
     id = Column(Integer, primary_key=True)
     name = Column(String(18), index=True, nullable=False)
     rank = Column(Integer, default=0)
+    faction = Column(String(8), default='')
+    ai = Column(Boolean, default=False)
     lastActive = Column(DateTime)
 
     # in-memory fields
