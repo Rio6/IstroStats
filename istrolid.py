@@ -92,6 +92,32 @@ class Istrolid:
             'runningSince': server.runningSince
         }
 
+    def getMatchInfo(self, matchId):
+        match = models.session.query(MatchModel).filter_by(id=matchId).one_or_none()
+
+        if match is None: return None
+
+        players = []
+        for matchPlayer in models.session.query(MatchPlayerModel).filter_by(matchId=match.id):
+            player = models.session.query(PlayerModel).filter_by(id=matchPlayer.playerId).one_or_none()
+            if player is not None:
+                players.append({
+                    'name': player.name,
+                    'ai': player.ai,
+                    'winner': matchPlayer.winner,
+                    'side': matchPlayer.side,
+                })
+
+
+        return {
+            'server': match.server,
+            'finished': match.finished,
+            'type': match.type,
+            'winningSide': match.winningSide,
+            'time': match.time,
+            'players': players
+        }
+
     def getPlayers(self, **query):
         rst = models.session.query(PlayerModel.name)
 
@@ -138,7 +164,31 @@ class Istrolid:
         return rst
 
     def getMatches(self, **query):
-        pass
+        rst = models.session.query(MatchModel.id)
+
+        if 'server' in query:
+            rst = rst.filter_by(server=_single(query['server']))
+
+        if 'type' in query:
+            rst = rst.filter_by(type=_single(query['type']))
+
+        # TODO players and winners
+
+        if 'order' in query:
+            order = _single(query['order'])
+            if order == 'finished_des':
+                rst = rst.order_by(MatchModel.finished.desc())
+            elif order == 'finished_asc':
+                rst = rst.order_by(MatchModel.finished.asc())
+            if order == 'time_des':
+                rst = rst.order_by(MatchModel.time.desc())
+            elif order == 'time_asc':
+                rst = rst.order_by(MatchModel.time.asc())
+
+        rst = rst.offset(_single(query.get('offset', 0)))
+        rst = rst.limit(_single(query.get('limit', 20)))
+
+        return [r[0] for r in rst]
 
     def _onPlayers(self, players):
         self.fullPlayers = True

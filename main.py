@@ -39,10 +39,24 @@ class ServerCtl:
         else:
             return istro.getServers(**kwargs)
 
+@cherrypy.popargs('matchId')
+class MatchCtl:
+    @cherrypy.expose
+    @cherrypy.tools.json_out()
+    def index(self, **kwargs):
+        if 'matchId' in kwargs:
+            try:
+                return(timeFieldToEpoch(istro.getMatchInfo(int(kwargs['matchId']))))
+            except ValueError:
+                return None
+        else:
+            return istro.getMatches(**kwargs)
+
 class RootCtl:
     def __init__(self):
         self.player = PlayerCtl()
         self.server = ServerCtl()
+        self.match = MatchCtl()
 
     @cherrypy.expose()
     def index(self):
