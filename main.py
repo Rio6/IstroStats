@@ -85,6 +85,11 @@ def main():
         'global': {
             'server.socket_port': 8000,
             'tools.json_out.handler': json_handler
+        },
+        '/': {
+            'tools.staticdir.on': True,
+            'tools.staticdir.dir': os.path.dirname(os.path.realpath(__file__)) + '/frontend',
+            'tools.staticdir.index': 'index.html'
         }
     })
 
