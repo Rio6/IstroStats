@@ -79,11 +79,17 @@ def main():
     istroThread = threading.Thread(target=istro.start)
     cherrypy.engine.subscribe('start', istroThread.start)
     cherrypy.engine.subscribe('exit', istro.stop)
+
+    port = 8000
+    try:
+        port = int(os.environ.get('PORT', port))
+    except ValueError:
+        pass
     
     # web server
     cherrypy.quickstart(RootCtl(), '/', {
         'global': {
-            'server.socket_port': os.environ.get('PORT', 8000),
+            'server.socket_port': port,
             'tools.json_out.handler': json_handler
         },
         '/': {
