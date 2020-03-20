@@ -1,6 +1,7 @@
 import time
 import json
 import os
+import traceback
 
 import websocket
 from pymitter import EventEmitter
@@ -70,6 +71,7 @@ class IstroListener(EventEmitter):
         ws.send('["registerBot"]')
         if self.login:
             ws.send(f'["authSignIn",{{"email":"{email}","token":"{token}"}}]')
+            print("Logging in")
 
     def _onMessage(self, ws, msg):
         data = json.loads(msg);
@@ -80,9 +82,10 @@ class IstroListener(EventEmitter):
 
 
     def _onError(self, ws, err):
-        print("IstroListener Error: " + str(err))
-        self.emit('error', ws, err)
+        print("IstroListener Error:", end=" ")
+        traceback.print_exception(type(err), err, err.__traceback__)
+        self.emit('error', err)
 
     def _onClose(self, ws):
         print("IstroListener closed")
-        self.emit('close', ws)
+        self.emit('close', self.reconnecting)

@@ -34,6 +34,7 @@ class Istrolid:
         self.listener.on('servers', self._onServers)
         self.listener.on('serversDiff', self._onServersDiff)
         self.listener.on('gameReport', self._onGameReport)
+        self.listener.on('close', lambda recon: self.listener.setLogin(not recon))
 
     def start(self):
         self.listener.connect()
@@ -76,11 +77,15 @@ class Istrolid:
 
     def _onPlayers(self, players):
         self.fullPlayers = True
+        # filter non existent players
+        self.onlinePlayers = {n:p for n,p in self.onlinePlayers.items() if p.name in players}
         self._onPlayersDiff(players)
         self._tryLoginless()
 
     def _onServers(self, servers):
         self.fullServers = True
+        # filter non existent servers
+        self.servers = {n:s for n,s in self.servers.items() if s.name in servers}
         self._onServersDiff(servers)
         self._tryLoginless()
 
@@ -167,9 +172,7 @@ class Istrolid:
                 player.logonTime = datetime.utcnow()
                 self.onlinePlayers[player.id] = player
 
-            return player
-
-        return self.onlinePlayers[player.id]
+        return player
 
     def _getServer(self, name, online=False):
         if name not in self.servers:
