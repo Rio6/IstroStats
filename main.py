@@ -1,14 +1,14 @@
 #!/bin/env python
 
-import signal
+import os
 import threading
-import time
 import datetime
-import code
 import cherrypy
 
 import istrolid
 import models
+
+DATABASE_URL='sqlite:///database.db?check_same_thread=False'
 
 istro = istrolid.Istrolid()
 
@@ -25,7 +25,7 @@ class PlayerCtl:
     @cherrypy.tools.json_out()
     def index(self, **kwargs):
         if 'name' in kwargs:
-            return timeFieldToEpoch(istro.getPlayerInfo(name))
+            return timeFieldToEpoch(istro.getPlayerInfo(kwargs['name']))
         else:
             return istro.getPlayers(**kwargs)
 
@@ -35,7 +35,7 @@ class ServerCtl:
     @cherrypy.tools.json_out()
     def index(self, **kwargs):
         if 'name' in kwargs:
-            return(timeFieldToEpoch(istro.getServerInfo(name)))
+            return(timeFieldToEpoch(istro.getServerInfo(kwargs['name'])))
         else:
             return istro.getServers(**kwargs)
 
@@ -52,19 +52,19 @@ class MatchCtl:
         else:
             return istro.getMatches(**kwargs)
 
-class RootCtl:
+class APICtl:
     def __init__(self):
         self.player = PlayerCtl()
         self.server = ServerCtl()
         self.match = MatchCtl()
 
-    @cherrypy.expose()
-    def index(self):
-        return "hello"
+class RootCtl:
+    def __init__(self):
+        self.api = APICtl()
 
 def main():
 
-    models.init()
+    models.init(DATABASE_URL)
 
     # istro listener in another thread
     istroThread = threading.Thread(target=istro.start)

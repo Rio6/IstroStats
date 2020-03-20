@@ -5,8 +5,6 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.schema import Table
 from sqlalchemy.ext.declarative import declarative_base
 
-DATABASE_URL='sqlite:///database.db?check_same_thread=False'
-
 DeclarativeBase = declarative_base()
 
 engine = None
@@ -19,6 +17,7 @@ class PlayerModel(DeclarativeBase):
     name = Column(String(18), index=True, nullable=False)
     rank = Column(Integer, default=0)
     faction = Column(String(8), default='')
+    color = Column(String(18), default='#000000ff')
     ai = Column(Boolean, default=False)
     lastActive = Column(DateTime)
 
@@ -56,8 +55,8 @@ def get_or_create(model, **kwargs):
         session.flush()
         return instance
 
-def init():
+def init(dbUrl):
     global engine, session
-    engine = create_engine(DATABASE_URL)
+    engine = create_engine(dbUrl)
     session = scoped_session(sessionmaker(bind=engine, autoflush=True, autocommit=False))
     DeclarativeBase.metadata.create_all(engine)

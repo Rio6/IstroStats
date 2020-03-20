@@ -67,6 +67,7 @@ class Istrolid:
             'name': player.name,
             'rank': player.rank,
             'faction': player.faction,
+            'color': player.color,
             'mode': player.mode,
             'ai': player.ai,
             'logonTime': player.logonTime,
@@ -139,7 +140,7 @@ class Istrolid:
                 rst = rst.order_by(PlayerModel.name.asc())
 
         rst = rst.offset(_single(query.get('offset', 0)))
-        rst = rst.limit(_single(query.get('limit', 20)))
+        rst = rst.limit(_single(query.get('limit', 50)))
 
         return [r[0] for r in rst]
 
@@ -213,7 +214,7 @@ class Istrolid:
                 rst = rst.order_by(MatchModel.time.asc())
 
         rst = rst.offset(_single(query.get('offset', 0)))
-        rst = rst.limit(_single(query.get('limit', 20)))
+        rst = rst.limit(_single(query.get('limit', 50)))
 
         return [r[0] for r in rst]
 
@@ -248,6 +249,8 @@ class Istrolid:
                 oldPlayer.rank = player.get('rank', oldPlayer.rank)
                 oldPlayer.faction = player.get('faction', oldPlayer.faction)
                 oldPlayer.lastActive = datetime.utcnow()
+                if 'color' in player:
+                    oldPlayer.color = str.format('#{:02x}{:02x}{:02x}{:02x}', *player['color'])
                 models.session.commit()
 
                 # in-memory data
