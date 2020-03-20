@@ -16,7 +16,8 @@ def timeFieldToEpoch(data):
     if data is None: return None
     for k,v in data.items():
         if isinstance(v, datetime.datetime):
-            data[k] = v.timestamp()
+            data[k] = v.replace(tzinfo=datetime.timezone.utc).timestamp()
+            print(v, data[k])
     return data
 
 @cherrypy.popargs('name')

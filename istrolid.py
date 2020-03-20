@@ -241,14 +241,15 @@ class Istrolid:
     def _onPlayersDiff(self, diff):
         for name, player in diff.items():
             if player is None:
-                self.onlinePlayers.pop(self._getPlayerId(name), None)
+                player = self._getPlayer(name, create=True)
+                player.lastActive = datetime.utcnow()
+                self.onlinePlayers.pop(player.id, None)
             else:
                 oldPlayer = self._getPlayer(name, online=True, create=True)
 
                 # database data
                 oldPlayer.rank = player.get('rank', oldPlayer.rank)
                 oldPlayer.faction = player.get('faction', oldPlayer.faction)
-                oldPlayer.lastActive = datetime.utcnow()
                 if 'color' in player:
                     oldPlayer.color = str.format('#{:02x}{:02x}{:02x}{:02x}', *player['color'])
                 models.session.commit()
@@ -314,7 +315,7 @@ class Istrolid:
                 if player is None: return None
 
             if online:
-                player.logonTime = datetime.utcnow()
+                player.lastActive = player.logonTime = datetime.utcnow()
                 self.onlinePlayers[player.id] = player
 
         return player
