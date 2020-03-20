@@ -7,6 +7,18 @@ from istro_listener import IstroListener
 def _isTrue(string):
     return string.lower() in ('true', 'yes', 't', 'y', '1')
 
+def _single(x):
+    if isinstance(x, list):
+        return x[0]
+    else:
+        return x
+
+def _multiple(x):
+    if isinstance(x, list):
+        return x
+    else:
+        return [x]
+
 class Server:
     class Player:
         def __init__(self, name, side, ai=False):
@@ -83,24 +95,25 @@ class Istrolid:
     def getPlayers(self, **query):
         rst = models.session.query(PlayerModel.name)
 
-        if _isTrue(query.get('online', '')):
+        if _isTrue(_single(query.get('online', ''))):
             rst = rst.filter(PlayerModel.name.in_([p.name for p in self.onlinePlayers.values()]))
 
         if 'ai' in query:
-            rst = rst.filter_by(ai=_isTrue(query['ai']))
+            rst = rst.filter_by(ai=_isTrue(_single(query['ai'])))
 
         if 'order' in query:
-            if query['order'] == 'rank_des':
+            order = _single(query['order'])
+            if order == 'rank_des':
                 rst = rst.order_by(PlayerModel.rank.desc())
-            elif query['order'] == 'rank_asc':
+            elif order == 'rank_asc':
                 rst = rst.order_by(PlayerModel.rank.asc())
-            elif query['order'] == 'name_des':
+            elif order == 'name_des':
                 rst = rst.order_by(PlayerModel.name.desc())
-            elif query['order'] == 'name_asc':
+            elif order == 'name_asc':
                 rst = rst.order_by(PlayerModel.name.asc())
 
-        rst = rst.offset(query.get('offset', 0))
-        rst = rst.limit(query.get('limit', 20))
+        rst = rst.offset(_single(query.get('offset', 0)))
+        rst = rst.limit(_single(query.get('limit', 20)))
 
         return [r[0] for r in rst]
 
@@ -108,17 +121,15 @@ class Istrolid:
         rst = []
         for name, server in self.servers.items():
             if 'running' in query:
-                if _isTrue(query['running']) != (server.runningSince is not None):
+                if _isTrue(_single(query['running'])) != (server.runningSince is not None):
                     continue
 
             if 'type' in query:
-                if query['type'].lower() != server.type.lower():
+                if _single(query['type']).lower() != server.type.lower():
                     continue
 
             if 'player' in query:
-                if not isinstance(query['player'], list):
-                    query['player'] = [query['player']]
-                print(query['player'])
+                query['player'] = _multiple(query['player'])
                 if all([p.name not in query['player'] for p in server.players]):
                     continue
 
