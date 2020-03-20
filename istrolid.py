@@ -155,8 +155,8 @@ class Istrolid:
                     continue
 
             if 'player' in query:
-                query['player'] = _multiple(query['player'])
-                if all([p.name not in query['player'] for p in server.players]):
+                players = _multiple(query['player'])
+                if any([p.name not in players for p in server.players]):
                     continue
 
             rst.append(name)
@@ -166,13 +166,40 @@ class Istrolid:
     def getMatches(self, **query):
         rst = models.session.query(MatchModel.id)
 
+        def matchPlayer(name, winner=None):
+            matchPlayer = (models.session.query(MatchPlayerModel)
+                    .filter(models.MatchPlayerModel.matchId == models.MatchModel.id))
+
+            playerId = self._getPlayerId(name)
+            if playerId is not None:
+                matchPlayer = matchPlayer.filter_by(playerId=playerId)
+                if winner is not None:
+                    matchPlayer = matchPlayer.filter_by(winner=winner)
+            else:
+                matchPlayer.filter(False)
+
+            return matchPlayer
+
+        if 'player' in query:
+            players = _multiple(query['player'])
+            for name in players:
+                rst = rst.filter(matchPlayer(name).exists())
+
+        if 'winner' in query:
+            winners = _multiple(query['winner'])
+            for name in winners:
+                rst = rst.filter(matchPlayer(name, True).exists())
+
+        if 'loser' in query:
+            losers = _multiple(query['loser'])
+            for name in losers:
+                rst = rst.filter(matchPlayer(name, False).exists())
+
         if 'server' in query:
             rst = rst.filter_by(server=_single(query['server']))
 
         if 'type' in query:
             rst = rst.filter_by(type=_single(query['type']))
-
-        # TODO players and winners
 
         if 'order' in query:
             order = _single(query['order'])
@@ -213,8 +240,7 @@ class Istrolid:
     def _onPlayersDiff(self, diff):
         for name, player in diff.items():
             if player is None:
-                playerId = self._getPlayer(name, online=False).id
-                self.onlinePlayers.pop(playerId, None)
+                self.onlinePlayers.pop(self._getPlayerId(name), None)
             else:
                 oldPlayer = self._getPlayer(name, online=True, create=True)
 
@@ -262,7 +288,7 @@ class Istrolid:
             models.session.commit()
 
             for player in report['players']:
-                playerId = self._getPlayer(player['name'], player['ai'], online=False, create=True).id
+                playerId = self._getPlayer(player['name'], player['ai'], create=True).id
                 models.session.add(MatchPlayerModel(
                     matchId = match.id,
                     playerId = playerId,
@@ -289,6 +315,11 @@ class Istrolid:
                 self.onlinePlayers[player.id] = player
 
         return player
+
+    def _getPlayerId(self, name, ai=False):
+        player = self._getPlayer(name, ai)
+        if player is None: return None
+        return player.id
 
     def _getServer(self, name, online=False):
         if name not in self.servers:
