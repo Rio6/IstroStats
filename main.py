@@ -23,8 +23,11 @@ def timeFieldToEpoch(data):
 class PlayerCtl:
     @cherrypy.expose
     @cherrypy.tools.json_out()
-    def index(self, name=None):
-        return timeFieldToEpoch(istro.getPlayerInfo(name))
+    def index(self, **kwargs):
+        if 'name' in kwargs:
+            return timeFieldToEpoch(istro.getPlayerInfo(name))
+        else:
+            return istro.getPlayers(**kwargs)
 
 @cherrypy.popargs('name')
 class ServerCtl:

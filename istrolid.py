@@ -4,6 +4,9 @@ import models
 from models import PlayerModel, MatchModel, MatchPlayerModel
 from istro_listener import IstroListener
 
+def _isTrue(string):
+    return string.lower() in ('true', 'yes', 't', 'y', '1')
+
 class Server:
     class Player:
         def __init__(self, name, side, ai=False):
@@ -74,6 +77,30 @@ class Istrolid:
             'hidden': server.hidden,
             'runningSince': server.runningSince
         }
+
+    def getPlayers(self, **query):
+        rst = models.session.query(PlayerModel.name)
+
+        if _isTrue(query.get('online', '')):
+            rst = rst.filter(PlayerModel.name.in_([p.name for p in self.onlinePlayers.values()]))
+
+        if 'ai' in query:
+            rst = rst.filter_by(ai=_isTrue(query['ai']))
+
+        if 'order' in query:
+            if query['order'] == 'rank_des':
+                rst = rst.order_by(PlayerModel.rank.desc())
+            elif query['order'] == 'rank_asc':
+                rst = rst.order_by(PlayerModel.rank.asc())
+            elif query['order'] == 'name_des':
+                rst = rst.order_by(PlayerModel.name.desc())
+            elif query['order'] == 'name_asc':
+                rst = rst.order_by(PlayerModel.name.asc())
+
+        rst = rst.offset(query.get('offset', 0))
+        rst = rst.limit(query.get('limit', 20))
+
+        return [r[0] for r in rst]
 
     def _onPlayers(self, players):
         self.fullPlayers = True
