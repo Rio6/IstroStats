@@ -73,7 +73,7 @@ class RootCtl:
 
 def main():
 
-    models.init(DATABASE_URL)
+    models.init(os.environ.get('DATABASE_URL', DATABASE_URL))
 
     # istro listener in another thread
     istroThread = threading.Thread(target=istro.start)
@@ -83,7 +83,7 @@ def main():
     # web server
     cherrypy.quickstart(RootCtl(), '/', {
         'global': {
-            'server.socket_port': 8000,
+            'server.socket_port': os.environ.get('PORT', 8000),
             'tools.json_out.handler': json_handler
         },
         '/': {
