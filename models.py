@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from sqlalchemy import *
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.schema import Table
@@ -29,15 +31,17 @@ class MatchModel(DeclarativeBase):
 
     id = Column(Integer, primary_key=True)
     serverName = Column(String(32), nullable=False)
-    type = Column(String(16), nullable=False)
+    finishTime = Column(DateTime, nullable=False, default=datetime.utcnow, index=True)
+    type = Column(String(16))
     winningSide = Column(String(16))
     time = Column(Float)
 
 class MatchPlayerModel(DeclarativeBase):
     __tablename__ = 'match_players'
 
-    matchId = Column(Integer, nullable=False, primary_key=True)
-    playerId = Column(Integer, nullable=False, primary_key=True)
+    id = Column(Integer, primary_key=True)
+    matchId = Column(Integer, nullable=False, index=True)
+    playerId = Column(Integer, nullable=False, index=True)
     winner = Column(Boolean, nullable=False)
     side = Column(String(16))
 
@@ -49,6 +53,7 @@ def get_or_create(model, **kwargs):
     else:
         instance = model(**kwargs)
         session.add(instance)
+        session.flush()
         return instance
 
 def init():
