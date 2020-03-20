@@ -142,7 +142,7 @@ class Istrolid:
         rst = rst.offset(_single(query.get('offset', 0)))
         rst = rst.limit(_single(query.get('limit', 50)))
 
-        return [r[0] for r in rst]
+        return [self.getPlayerInfo(r[0]) for r in rst]
 
     def getServers(self, **query):
         rst = []
@@ -162,7 +162,7 @@ class Istrolid:
 
             rst.append(name)
 
-        return rst
+        return [self.getServerInfo(r) for r in rst]
 
     def getMatches(self, **query):
         rst = models.session.query(MatchModel.id)
@@ -216,7 +216,7 @@ class Istrolid:
         rst = rst.offset(_single(query.get('offset', 0)))
         rst = rst.limit(_single(query.get('limit', 50)))
 
-        return [r[0] for r in rst]
+        return [self.getMatchInfo(r[0]) for r in rst]
 
     def _onPlayers(self, players):
         self.fullPlayers = True

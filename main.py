@@ -3,6 +3,7 @@
 import os
 import threading
 import datetime
+import json
 import cherrypy
 
 import istrolid
@@ -12,13 +13,20 @@ DATABASE_URL='sqlite:///database.db?check_same_thread=False'
 
 istro = istrolid.Istrolid()
 
-def timeFieldToEpoch(data):
-    if data is None: return None
-    for k,v in data.items():
-        if isinstance(v, datetime.datetime):
-            data[k] = v.replace(tzinfo=datetime.timezone.utc).timestamp()
-            print(v, data[k])
-    return data
+# Date time to json
+class DatetimeJSONEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, datetime.datetime):
+            return obj.replace(tzinfo=datetime.timezone.utc).timestamp()
+        return super().default(obj)
+    def iterencode(self, value):
+        for chunk in super().iterencode(value):
+            yield chunk.encode("utf-8")
+
+json_encoder = DatetimeJSONEncoder()
+def json_handler(*args, **kwargs):
+    value = cherrypy.serving.request._json_inner_handler(*args, **kwargs)
+    return json_encoder.iterencode(value)
 
 @cherrypy.popargs('name')
 class PlayerCtl:
@@ -26,7 +34,7 @@ class PlayerCtl:
     @cherrypy.tools.json_out()
     def index(self, **kwargs):
         if 'name' in kwargs:
-            return timeFieldToEpoch(istro.getPlayerInfo(kwargs['name']))
+            return istro.getPlayerInfo(kwargs['name'])
         else:
             return istro.getPlayers(**kwargs)
 
@@ -36,7 +44,7 @@ class ServerCtl:
     @cherrypy.tools.json_out()
     def index(self, **kwargs):
         if 'name' in kwargs:
-            return(timeFieldToEpoch(istro.getServerInfo(kwargs['name'])))
+            return(istro.getServerInfo(kwargs['name']))
         else:
             return istro.getServers(**kwargs)
 
@@ -47,7 +55,7 @@ class MatchCtl:
     def index(self, **kwargs):
         if 'matchId' in kwargs:
             try:
-                return(timeFieldToEpoch(istro.getMatchInfo(int(kwargs['matchId']))))
+                return(istro.getMatchInfo(int(kwargs['matchId'])))
             except ValueError:
                 return None
         else:
@@ -76,6 +84,7 @@ def main():
     cherrypy.quickstart(RootCtl(), '/', {
         'global': {
             'server.socket_port': 8000,
+            'tools.json_out.handler': json_handler
         }
     })
 
