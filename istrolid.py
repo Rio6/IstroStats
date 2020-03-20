@@ -49,6 +49,7 @@ class Istrolid:
         player = self._getPlayer(name, online=False)
 
         if player is None: return None
+
         return {
             'id': player.id,
             'name': player.name,
@@ -64,6 +65,7 @@ class Istrolid:
         server = self._getServer(name, False)
 
         if server is None: return None
+
         return {
             'name': server.name,
             'players': [{
@@ -101,6 +103,31 @@ class Istrolid:
         rst = rst.limit(query.get('limit', 20))
 
         return [r[0] for r in rst]
+
+    def getServers(self, **query):
+        rst = []
+        for name, server in self.servers.items():
+            if 'running' in query:
+                if _isTrue(query['running']) != (server.runningSince is not None):
+                    continue
+
+            if 'type' in query:
+                if query['type'].lower() != server.type.lower():
+                    continue
+
+            if 'player' in query:
+                if not isinstance(query['player'], list):
+                    query['player'] = [query['player']]
+                print(query['player'])
+                if all([p.name not in query['player'] for p in server.players]):
+                    continue
+
+            rst.append(name)
+
+        return rst
+
+    def getMatches(self, **query):
+        pass
 
     def _onPlayers(self, players):
         self.fullPlayers = True
@@ -166,7 +193,7 @@ class Istrolid:
     def _onGameReport(self, report):
         try:
             match = models.MatchModel(
-                serverName = report['serverName'],
+                server = report['serverName'],
                 type = report['type'],
                 winningSide = report['winningSide'],
                 time = report['time'])
@@ -182,7 +209,8 @@ class Istrolid:
                     side = player['side']))
                 models.session.commit()
 
-        except KeyError:
+        except KeyError as e:
+            print(e)
             models.session.rollback()
 
     def _getPlayer(self, name, ai=False, online=False, create=False):

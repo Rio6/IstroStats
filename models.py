@@ -30,8 +30,8 @@ class MatchModel(DeclarativeBase):
     __tablename__ = 'matches'
 
     id = Column(Integer, primary_key=True)
-    serverName = Column(String(32), nullable=False)
-    finishTime = Column(DateTime, nullable=False, default=datetime.utcnow, index=True)
+    server = Column(String(32), nullable=False)
+    finished = Column(DateTime, nullable=False, default=datetime.utcnow, index=True)
     type = Column(String(16))
     winningSide = Column(String(16))
     time = Column(Float)

@@ -33,8 +33,11 @@ class PlayerCtl:
 class ServerCtl:
     @cherrypy.expose
     @cherrypy.tools.json_out()
-    def index(self, name=None):
-        return(timeFieldToEpoch(istro.getServerInfo(name)))
+    def index(self, **kwargs):
+        if 'name' in kwargs:
+            return(timeFieldToEpoch(istro.getServerInfo(name)))
+        else:
+            return istro.getServers(**kwargs)
 
 class RootCtl:
     def __init__(self):
