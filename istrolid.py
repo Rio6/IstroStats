@@ -62,6 +62,8 @@ class Istrolid:
 
         if player is None: return None
 
+        servers = [name for name,server in self.servers.items() if any([player.name == p.name for p in server.players])]
+
         return {
             'id': player.id,
             'name': player.name,
@@ -69,6 +71,7 @@ class Istrolid:
             'faction': player.faction,
             'color': player.color,
             'mode': player.mode,
+            'servers': servers,
             'ai': player.ai,
             'logonTime': player.logonTime,
             'lastActive': player.lastActive,
@@ -111,6 +114,7 @@ class Istrolid:
 
 
         return {
+            'id': match.id,
             'server': match.server,
             'finished': match.finished,
             'type': match.type,
@@ -160,9 +164,16 @@ class Istrolid:
                 if any([p.name not in players for p in server.players]):
                     continue
 
-            rst.append(name)
+            rst.append(server)
 
-        return [self.getServerInfo(r) for r in rst]
+        if 'order' in query:
+            order = _single(query['order'])
+            if order == 'running_des':
+                rst.sort(key=lambda s: s.runningSince or datetime(3000, 1, 1), reverse=True)
+            elif order == 'running_asc':
+                rst.sort(key=lambda s: s.runningSince or datetime(3000, 1, 1), reverse=False)
+
+        return [self.getServerInfo(r.name) for r in rst]
 
     def getMatches(self, **query):
         rst = models.session.query(MatchModel.id)
