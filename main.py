@@ -9,7 +9,7 @@ import cherrypy
 import istrolid
 import models
 
-DATABASE_URL='sqlite:///database.db?check_same_thread=False'
+DATABASE_URL = 'sqlite:///database.db?check_same_thread=False'
 
 istro = istrolid.Istrolid()
 

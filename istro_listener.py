@@ -10,10 +10,16 @@ email = None
 token = None
 
 # load account token
-with open(os.path.dirname(os.path.realpath(__file__)) + '/token.json') as file:
-    data = json.load(file)
-    email = data['email']
-    token = data['token']
+email = os.environ.get('EMAIL', None)
+token = os.environ.get('TOKEN', None)
+
+if email is None or token is None:
+    with open(os.path.dirname(os.path.realpath(__file__)) + '/token.json') as file:
+        data = json.load(file)
+        if email is None:
+            email = data['email']
+        if token is None:
+            token = data['token']
 
 def _cbHelper(method):
     return lambda *args: method(*args)
