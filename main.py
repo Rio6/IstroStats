@@ -89,6 +89,7 @@ def main():
     # web server
     cherrypy.quickstart(RootCtl(), '/', {
         'global': {
+            'server.socket_host': '0.0.0.0',
             'server.socket_port': port,
             'tools.json_out.handler': json_handler
         },
