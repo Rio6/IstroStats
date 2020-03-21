@@ -82,6 +82,10 @@ class IstroListener(EventEmitter):
 
     def _onMessage(self, ws, msg):
         data = json.loads(msg);
+
+        if data[0] == 'authError':
+            print("Login error:", data[1])
+
         if len(data) == 1 and len(data[0]) == 1 and 'serverName' in data[0][0]:
             self.emit('gameReport', data[0][0])
         else:
