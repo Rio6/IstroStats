@@ -41,7 +41,7 @@ class MatchPlayerModel(DeclarativeBase):
     id = Column(Integer, primary_key=True)
     matchId = Column(Integer, ForeignKey('matches.id'), index=True, nullable=False)
     playerId = Column(Integer, ForeignKey('players.id'), index=True, nullable=False)
-    winner = Column(Boolean, nullable=False)
+    winner = Column(Boolean)
     side = Column(String(16))
 
     UniqueConstraint(matchId, playerId)

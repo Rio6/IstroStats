@@ -20,10 +20,6 @@ if email is None or token is None:
         if token is None:
             token = data['token']
 
-# because the websocket lib doen't send self to class methods
-def _cbHelper(method):
-    return lambda *args: method(*args)
-
 class IstroListener(EventEmitter):
     def __init__(self, login=False, root_address="ws://198.199.109.223:88"):
         super().__init__()
@@ -40,13 +36,19 @@ class IstroListener(EventEmitter):
         print("Starting IstroListener")
 
         self.ws = websocket.WebSocketApp(self.root_address,
-                on_open=_cbHelper(self._onOpen),
-                on_message=_cbHelper(self._onMessage),
-                on_error=_cbHelper(self._onError),
-                on_close=_cbHelper(self._onClose))
+                on_open=self._onOpen,
+                on_message=self._onMessage,
+                on_error=self._onError,
+                on_close=self._onClose)
 
-        # debug use
-        #self.ws._callback = lambda cb, *args: cb(self.ws, *args) if cb is not None else None
+        def ws_callback(cb, *args):
+            if cb is None: return
+            try:
+                cb(self.ws, *args)
+            except Exception as e:
+                print("IstroListener callback error:", e)
+
+        self.ws._callback = ws_callback
 
         self.stopped = False
 

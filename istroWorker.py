@@ -38,8 +38,9 @@ class IstrolidWorker:
     def _onServers(self, servers):
         self.fullServers = True
 
-        # remove non online servers and server-players
+        # remove non online servers and server-players; reset server state
         models.session.query(ServerModel).filter(ServerModel.name.notin_(servers.keys())).delete(synchronize_session='fetch')
+        models.session.query(ServerModel).update({'state': None}, synchronize_session='fetch')
         models.session.commit()
 
         self._onServersDiff(servers)
@@ -84,16 +85,15 @@ class IstrolidWorker:
 
                 if 'players' in serverInfo:
 
-                    def infos():
+                    def playerInfos():
                         playerInfos = serverInfo['players']
                         for info in playerInfos:
                             player = self._getPlayer(info['name'], info['ai'], updateOnline=False, create=True)
-                            yield (player.id, info)
+                            serverPlayer = models.get_or_create(ServerPlayerModel, serverId=server.id, playerId=player.id)
+                            serverPlayer.side = info['side']
+                            yield serverPlayer
 
-                    server.players = [
-                        models.get_or_create(ServerPlayerModel, serverId=server.id, playerId=id, side=info['side'])
-                        for id, info in infos()
-                    ]
+                    server.players = [p for p in playerInfos()]
 
                 if 'state' in serverInfo:
                     state = serverInfo['state']
@@ -101,7 +101,7 @@ class IstrolidWorker:
                     if state != server.state:
                         if state == 'running':
                             server.runningSince = datetime.utcnow()
-                        elif state == 'waiting':
+                        else:
                             server.runningSince = None
                     server.state = state
 
@@ -119,14 +119,15 @@ class IstrolidWorker:
                 winningSide = report['winningSide'],
                 time = report['time'])
 
+            models.session.add(match)
+
             for player in report['players']:
                 playerId = self._getPlayer(player['name'], player['ai'], create=True).id
-                match.players.append(MatchPlayerModel(
-                    playerId = playerId,
-                    winner = player['side'] == report['winningSide'],
-                    side = player['side']))
+                matchPlayer = models.get_or_create(MatchPlayerModel, matchId=match.id, playerId=playerId)
+                matchPlayer.winner = (player['side'] == report['winningSide'])
+                matchPlayer.side = player['side']
+                match.players.append(matchPlayer)
 
-            models.session.add(match)
             models.session.commit()
 
         except KeyError as e:
