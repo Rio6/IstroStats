@@ -28,7 +28,7 @@ $(document).ready(() => {
             data: {
                 player: name
             },
-            success: matches => {
+            success: ({matches}) => {
                 let win = 0, lose = 0, total = 0;
                 for(let match of matches) {
                     let player = match.players.find(p => p.name == name);

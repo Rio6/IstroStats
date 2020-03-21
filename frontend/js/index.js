@@ -5,12 +5,14 @@ $(document).ready(() => {
             online: true,
             order: 'rank_des'
         },
-        success: players => {
+        success: ({players}) => {
             for(let player of players) {
                 $('#players').append(`
-                    <li><a href="/player.html?name=${player.name}">${player.name}</a>
-                    ${player.mode}
-                    ${player.servers.map(s => `<a href="/server.html?name=${s}">${s}</a>`)}</li>
+                    <li class="list-group-item">
+                        <a href="/player.html?name=${player.name}">${player.name}</a>
+                        ${player.servers.length > 0 ? player.servers.map(s => `<a href="/server.html?name=${s}">${s}</a>`)
+                            : player.mode}
+                    </li>
                 `);
             }
         }
@@ -21,20 +23,15 @@ $(document).ready(() => {
         data: {
             order: 'running_des'
         },
-        success: servers => {
+        success: ({servers}) => {
             for(let server of servers) {
                 if(server.hidden) continue;
                 $('#servers').append(`
-                    <li><a href="/server.html?name=${server.name}">${server.name}</a>
-                    ${server.type}
-                    ${(() => {
-                        if(server.runningSince) {
-                            let time = (Date.now() - new Date(server.runningSince*1000)) / 1000;
-                            return `${Math.floor(time/60).toString().padStart(2, '0')}:${(time%60).toFixed().padStart(2, '0')}`;
-                        } else {
-                            return "Not running";
-                        }
-                    })()}
+                    <li class="list-group-item">
+                        ${server.type}
+                        <a href="/server.html?name=${server.name}">${server.name}</a>
+                        ${elapsed(server.runningSince) || "Not running"}
+                    </li>
                 `);
             }
         }
@@ -43,14 +40,19 @@ $(document).ready(() => {
     $.ajax({
         url: '/api/match/',
         data: {
-            order: 'finished_des'
+            order: 'finished_des',
+            limit: 20
         },
-        success: matches => {
+        success: ({matches}) => {
             for(let match of matches) {
                 $('#matches').append(`
-                    <li><a href="/match.html?id=${match.id}">${match.server} ${match.type}
-                    ${Math.floor(match.time/60).toString().padStart(2, '0')}:
-                    ${(match.time%60).toFixed().padStart(2, '0')}</a></li>
+                    <li class="list-group-item">
+                        <a href="/match.html?id=${match.id}">
+                            ${match.type} ${match.server}
+                        </a>
+                        ${Math.floor(match.time/60).toString().padStart(2, '0')}:
+                        ${(match.time%60).toFixed().padStart(2, '0')}
+                    </li>
                 `);
             }
         }

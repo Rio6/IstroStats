@@ -2,14 +2,19 @@
 <html>
     <head>
         <meta charset="utf-8">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
         <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
         <script src="/js/player.js"></script>
         <title>Player</title>
     </head>
     <body>
-        <h1>Player</h1>
-        Name: <span id="name"></span>
-        <br />
+        <nav class="nav border">
+            <a class="nav-link" href="/index.html">Home</a>
+            <a class="nav-link" href="/players.html">Players</a>
+            <a class="nav-link" href="/servers.html">Servers</a>
+            <a class="nav-link" href="/matches.html">Matches</a>
+        </nav>
+        <h1 id="name">Player</h1>
         Rank: <span id="rank"></span>
         <br />
         Faction: <span id="faction"></span>
