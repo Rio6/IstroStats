@@ -78,13 +78,14 @@ class IstroListener(EventEmitter):
         ws.send('["registerBot"]')
         if self.login:
             ws.send(f'["authSignIn",{{"email":"{email}","token":"{token}"}}]')
-            print("Logging in")
 
     def _onMessage(self, ws, msg):
         data = json.loads(msg);
 
         if data[0] == 'authError':
             print("Login error:", data[1])
+        elif data[0] == 'login':
+            print("Logged in")
 
         if len(data) == 1 and len(data[0]) == 1 and 'serverName' in data[0][0]:
             self.emit('gameReport', data[0][0])
