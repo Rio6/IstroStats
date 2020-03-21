@@ -25,19 +25,23 @@ class IstrolidWorker:
 
     def _onPlayers(self, players):
         self.fullPlayers = True
+
         # update non online players
         (models.session.query(PlayerModel)
                 .filter(PlayerModel.name.notin_(players.keys()))
                 .update({'logonTime': None, 'mode': None}, synchronize_session='fetch'))
         models.session.commit()
+
         self._onPlayersDiff(players)
         self._tryLoginless()
 
     def _onServers(self, servers):
         self.fullServers = True
-        # remove non online servers
+
+        # remove non online servers and server-players
         models.session.query(ServerModel).filter(ServerModel.name.notin_(servers.keys())).delete(synchronize_session='fetch')
         models.session.commit()
+
         self._onServersDiff(servers)
         self._tryLoginless()
 
@@ -86,7 +90,10 @@ class IstrolidWorker:
                             player = self._getPlayer(info['name'], info['ai'], updateOnline=False, create=True)
                             yield (player.id, info)
 
-                    server.players = [ServerPlayerModel(playerId=id, side=info['side']) for id, info in infos()]
+                    server.players = [
+                        models.get_or_create(ServerPlayerModel, serverId=server.id, playerId=id, side=info['side'])
+                        for id, info in infos()
+                    ]
 
                 if 'state' in serverInfo:
                     state = serverInfo['state']

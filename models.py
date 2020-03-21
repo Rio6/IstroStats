@@ -29,8 +29,8 @@ class PlayerModel(DeclarativeBase):
 class ServerPlayerModel(DeclarativeBase):
     __tablename__ = 'server_players'
     id = Column(Integer, primary_key=True)
-    serverId = Column(Integer, ForeignKey('servers.id'))
-    playerId = Column(Integer, ForeignKey('players.id'))
+    serverId = Column(Integer, ForeignKey('servers.id'), nullable=False)
+    playerId = Column(Integer, ForeignKey('players.id'), nullable=False)
     side = Column(String(18))
 
     UniqueConstraint(serverId, playerId)
@@ -39,8 +39,8 @@ class MatchPlayerModel(DeclarativeBase):
     __tablename__ = 'match_players'
 
     id = Column(Integer, primary_key=True)
-    matchId = Column(Integer, ForeignKey('matches.id'), index=True)
-    playerId = Column(Integer, ForeignKey('players.id'), index=True)
+    matchId = Column(Integer, ForeignKey('matches.id'), index=True, nullable=False)
+    playerId = Column(Integer, ForeignKey('players.id'), index=True, nullable=False)
     winner = Column(Boolean, nullable=False)
     side = Column(String(16))
 
@@ -57,7 +57,7 @@ class ServerModel(DeclarativeBase):
     hidden = Column(Boolean)
     runningSince = Column(DateTime)
 
-    players = relationship(ServerPlayerModel)
+    players = relationship(ServerPlayerModel, cascade='all, delete-orphan')
 
 class MatchModel(DeclarativeBase):
     __tablename__ = 'matches'
