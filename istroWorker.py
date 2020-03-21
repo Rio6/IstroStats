@@ -5,6 +5,8 @@ import models
 from models import PlayerModel, MatchModel, MatchPlayerModel, ServerModel, ServerPlayerModel
 from istro_listener import IstroListener
 
+ISTRO_NAME = "IstroStats"
+
 class IstrolidWorker:
     def __init__(self):
         self.fullPlayers = False
@@ -39,9 +41,8 @@ class IstrolidWorker:
     def _onServers(self, servers):
         self.fullServers = True
 
-        # remove non online servers and server-players; reset server state
+        # remove non online servers and server-players
         models.session.query(ServerModel).filter(ServerModel.name.notin_(servers.keys())).delete(synchronize_session='fetch')
-        models.session.query(ServerModel).update({'state': None}, synchronize_session='fetch')
         models.session.commit()
 
         self._onServersDiff(servers)
@@ -55,6 +56,7 @@ class IstrolidWorker:
 
     def _onPlayersDiff(self, diff):
         for name, playerInfo in diff.items():
+            if name == ISTRO_NAME: continue
 
             if playerInfo is None:
                 # Player logged off
@@ -145,6 +147,10 @@ class IstrolidWorker:
             if player is None: return None
 
         if updateOnline:
-            player.lastActive = player.logonTime = datetime.utcnow()
+            now = datetime.utcnow()
+            player.lastActive = now
+            if player.logonTime is None:
+                player.logonTime = now
+
 
         return player

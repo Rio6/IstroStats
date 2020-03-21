@@ -98,8 +98,11 @@ class IstrolidAPI:
     def getPlayers(self, **query):
         rst = models.session.query(PlayerModel)
 
-        if _bool(_single(query.get('online', ''))):
-            rst = rst.filter(PlayerModel.logonTime != None)
+        if 'online' in query:
+            if _bool(_single(query['online'])):
+                rst = rst.filter(PlayerModel.logonTime != None)
+            else:
+                rst = rst.filter(PlayerModel.logonTime == None)
 
         if 'ai' in query:
             rst = rst.filter_by(ai=_bool(_single(query['ai'])))
@@ -114,11 +117,20 @@ class IstrolidAPI:
                 rst = rst.order_by(PlayerModel.name.desc())
             elif order == 'name_asc':
                 rst = rst.order_by(PlayerModel.name.asc())
+            elif order == 'logon_des':
+                rst = rst.order_by(PlayerModel.logonTime.asc().nullslast(), PlayerModel.lastActive.desc())
+            elif order == 'logon_asc':
+                rst = rst.order_by(PlayerModel.logonTime.desc().nullsfirst(), PlayerModel.lastActive.asc())
+
+        count = rst.count()
 
         rst = rst.offset(_single(query.get('offset', 0)))
         rst = rst.limit(_single(query.get('limit', 50)))
 
-        return [self._playerToInfo(r) for r in rst]
+        return {
+            'count': count,
+            'players': [self._playerToInfo(r) for r in rst]
+        }
 
     def getServers(self, **query):
         rst = models.session.query(ServerModel)
@@ -144,7 +156,9 @@ class IstrolidAPI:
             elif order == 'running_asc':
                 rst = rst.order_by(ServerModel.runningSince.asc().nullslast())
 
-        return [self._serverToInfo(r) for r in rst]
+        return {
+            'servers': [self._serverToInfo(r) for r in rst]
+        }
 
     def getMatches(self, **query):
         rst = models.session.query(MatchModel)
@@ -183,7 +197,12 @@ class IstrolidAPI:
             elif order == 'time_asc':
                 rst = rst.order_by(MatchModel.time.asc())
 
+        count = rst.count()
+
         rst = rst.offset(_single(query.get('offset', 0)))
         rst = rst.limit(_single(query.get('limit', 50)))
 
-        return [self._matchToInfo(r) for r in rst]
+        return {
+            'count': count,
+            'matches': [self._matchToInfo(r) for r in rst]
+        }
