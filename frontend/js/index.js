@@ -19,10 +19,11 @@ $(document).ready(() => {
     $.ajax({
         url: '/api/server',
         data: {
-            order: 'running_asc'
+            order: 'running_des'
         },
         success: servers => {
             for(let server of servers) {
+                if(server.hidden) continue;
                 $('#servers').append(`
                     <li><a href="/server.html?name=${server.name}">${server.name}</a>
                     ${server.type}

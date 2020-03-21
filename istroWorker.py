@@ -51,6 +51,7 @@ class IstrolidWorker:
         for name, playerInfo in diff.items():
 
             if playerInfo is None:
+                # Player logged off
                 playerInfo = self._getPlayer(name, create=True)
                 playerInfo.lastActive = datetime.utcnow()
                 playerInfo.logonTime = None
@@ -69,10 +70,12 @@ class IstrolidWorker:
 
     def _onServersDiff(self, diff):
         for name, serverInfo in diff.items():
-            if serverInfo is None:
-                models.session.query(ServerModel).filter_by(name=name).delete(synchronize_session='fetch')
-            else:
 
+            if serverInfo is None:
+                # server offline
+                models.session.query(ServerModel).filter_by(name=name).delete(synchronize_session='fetch')
+
+            else:
                 server = models.get_or_create(ServerModel, name=name)
 
                 if 'players' in serverInfo:
@@ -87,6 +90,7 @@ class IstrolidWorker:
 
                 if 'state' in serverInfo:
                     state = serverInfo['state']
+                    # Record running time when state changes
                     if state != server.state:
                         if state == 'running':
                             server.runningSince = datetime.utcnow()
@@ -108,8 +112,6 @@ class IstrolidWorker:
                 winningSide = report['winningSide'],
                 time = report['time'])
 
-            models.session.add(match)
-
             for player in report['players']:
                 playerId = self._getPlayer(player['name'], player['ai'], create=True).id
                 match.players.append(MatchPlayerModel(
@@ -117,12 +119,15 @@ class IstrolidWorker:
                     winner = player['side'] == report['winningSide'],
                     side = player['side']))
 
+            models.session.add(match)
             models.session.commit()
 
         except KeyError as e:
-            print(e)
+            print("Error adding new match:", e)
             models.session.rollback()
 
+    # updateOnline: add player to online lis
+    # create: create player in db if it doesn't exist
     def _getPlayer(self, name, ai=False, updateOnline=False, create=False):
         if create:
             player = models.get_or_create(PlayerModel, name=name, ai=ai)

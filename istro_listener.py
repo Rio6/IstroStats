@@ -1,7 +1,6 @@
 import time
 import json
 import os
-import traceback
 
 import websocket
 from pymitter import EventEmitter
@@ -21,6 +20,7 @@ if email is None or token is None:
         if token is None:
             token = data['token']
 
+# because the websocket lib doen't send self to class methods
 def _cbHelper(method):
     return lambda *args: method(*args)
 
@@ -32,6 +32,7 @@ class IstroListener(EventEmitter):
         self.stopped = True
         self.reconnecting = False
 
+    # whether to use email+token to obtain full game information
     def setLogin(self, login):
         self.login = login
 
@@ -56,7 +57,7 @@ class IstroListener(EventEmitter):
             self.ws.run_forever()
 
             if self.stopped: break
-            if not self.reconnecting:
+            if not self.reconnecting: # add timeout between auto reconnects
                 time.sleep(max(5 - (time.time() - startTime), 1))
             print("Reconnecting IstroListener")
 
@@ -88,8 +89,7 @@ class IstroListener(EventEmitter):
 
 
     def _onError(self, ws, err):
-        print("IstroListener Error:", end=" ")
-        traceback.print_exception(type(err), err, err.__traceback__)
+        print("IstroListener Error:", err)
         self.emit('error', err)
 
     def _onClose(self, ws):

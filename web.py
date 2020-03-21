@@ -10,7 +10,7 @@ import models
 
 istro = IstrolidAPI()
 
-# Date time to json
+# JSON encoder that can serialize datetime
 class DatetimeJSONEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, datetime.datetime):

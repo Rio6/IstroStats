@@ -1,7 +1,8 @@
 import models
 from models import PlayerModel, MatchModel, MatchPlayerModel, ServerModel, ServerPlayerModel
 
-def _isTrue(string):
+# helper functions to ensure we get the right data type from http params
+def _bool(string):
     return string.lower() in ('true', 'yes', 't', 'y', '1')
 
 def _single(x):
@@ -97,11 +98,11 @@ class IstrolidAPI:
     def getPlayers(self, **query):
         rst = models.session.query(PlayerModel)
 
-        if _isTrue(_single(query.get('online', ''))):
+        if _bool(_single(query.get('online', ''))):
             rst = rst.filter(PlayerModel.logonTime != None)
 
         if 'ai' in query:
-            rst = rst.filter_by(ai=_isTrue(_single(query['ai'])))
+            rst = rst.filter_by(ai=_bool(_single(query['ai'])))
 
         if 'order' in query:
             order = _single(query['order'])
@@ -123,7 +124,7 @@ class IstrolidAPI:
         rst = models.session.query(ServerModel)
 
         if 'running' in query:
-            if _isTrue(_single(query['running'])):
+            if _bool(_single(query['running'])):
                 rst = rst.filter(ServerModel.runningSince != None)
             else:
                 rst = rst.filter(ServerModel.runningSince == None)
@@ -139,9 +140,9 @@ class IstrolidAPI:
         if 'order' in query:
             order = _single(query['order'])
             if order == 'running_des':
-                rst.order_by(ServerModel.runningSince.desc())
+                rst = rst.order_by(ServerModel.runningSince.desc().nullsfirst())
             elif order == 'running_asc':
-                rst.order_by(ServerModel.runningSince.asc())
+                rst = rst.order_by(ServerModel.runningSince.asc().nullslast())
 
         return [self._serverToInfo(r) for r in rst]
 
