@@ -44,8 +44,8 @@ class IstroListener(EventEmitter):
                 on_error=_cbHelper(self._onError),
                 on_close=_cbHelper(self._onClose))
 
-        # DEBUG
-        self.ws._callback = lambda cb, *args: cb(self.ws, *args) if cb is not None else None
+        # debug use
+        #self.ws._callback = lambda cb, *args: cb(self.ws, *args) if cb is not None else None
 
         self.stopped = False
 

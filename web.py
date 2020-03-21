@@ -1,17 +1,14 @@
 #!/bin/env python
 
 import os
-import threading
 import datetime
 import json
 import cherrypy
 
-import istrolid
+from istroAPI import IstrolidAPI
 import models
 
-DATABASE_URL = 'sqlite:///database.db?check_same_thread=False'
-
-istro = istrolid.Istrolid()
+istro = IstrolidAPI()
 
 # Date time to json
 class DatetimeJSONEncoder(json.JSONEncoder):
@@ -72,25 +69,11 @@ class RootCtl:
         self.api = APICtl()
 
 def main():
-
-    models.init(os.environ.get('DATABASE_URL', DATABASE_URL))
-
-    # istro listener in another thread
-    istroThread = threading.Thread(target=istro.start)
-    cherrypy.engine.subscribe('start', istroThread.start)
-    cherrypy.engine.subscribe('exit', istro.stop)
-
-    port = 8000
-    try:
-        port = int(os.environ.get('PORT', port))
-    except ValueError:
-        pass
-    
     # web server
     cherrypy.quickstart(RootCtl(), '/', {
         'global': {
             'server.socket_host': '0.0.0.0',
-            'server.socket_port': port,
+            'server.socket_port': int(os.environ.get('PORT', 8000)),
             'tools.json_out.handler': json_handler
         },
         '/': {

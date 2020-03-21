@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 
 from sqlalchemy import *
@@ -5,10 +6,12 @@ from sqlalchemy.orm import scoped_session, sessionmaker, relationship
 from sqlalchemy.schema import UniqueConstraint
 from sqlalchemy.ext.declarative import declarative_base
 
+DATABASE_URL = 'sqlite:///database.db?check_same_thread=False'
+
 DeclarativeBase = declarative_base()
 
-engine = None
-session = None
+engine = create_engine(os.environ.get('DATABASE_URL', DATABASE_URL))
+session = scoped_session(sessionmaker(bind=engine, autoflush=True, autocommit=False))
 
 class PlayerModel(DeclarativeBase):
     __tablename__ = 'players'
@@ -79,8 +82,4 @@ def get_or_create(model, **kwargs):
         session.flush()
         return instance
 
-def init(dbUrl):
-    global engine, session
-    engine = create_engine(dbUrl)
-    session = scoped_session(sessionmaker(bind=engine, autoflush=True, autocommit=False))
-    DeclarativeBase.metadata.create_all(engine)
+DeclarativeBase.metadata.create_all(engine)

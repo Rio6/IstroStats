@@ -1,0 +1,136 @@
+from datetime import datetime
+
+import models
+from models import PlayerModel, MatchModel, MatchPlayerModel, ServerModel, ServerPlayerModel
+from istro_listener import IstroListener
+
+class IstrolidWorker:
+    def __init__(self):
+        self.fullPlayers = False
+        self.fullServers = False
+
+        self.listener = IstroListener(login=True)
+        self.listener.on('players', self._onPlayers)
+        self.listener.on('playersDiff', self._onPlayersDiff)
+        self.listener.on('servers', self._onServers)
+        self.listener.on('serversDiff', self._onServersDiff)
+        self.listener.on('gameReport', self._onGameReport)
+        self.listener.on('close', lambda recon: self.listener.setLogin(not recon))
+
+    def start(self):
+        self.listener.connect()
+
+    def stop(self):
+        self.listener.close()
+
+    def _onPlayers(self, players):
+        self.fullPlayers = True
+        # update non online players
+        (models.session.query(PlayerModel)
+                .filter(PlayerModel.name.notin_(players.keys()))
+                .update({'logonTime': None, 'mode': None}, synchronize_session='fetch'))
+        models.session.commit()
+        self._onPlayersDiff(players)
+        self._tryLoginless()
+
+    def _onServers(self, servers):
+        self.fullServers = True
+        # remove non online servers
+        models.session.query(ServerModel).filter(ServerModel.name.notin_(servers.keys())).delete(synchronize_session='fetch')
+        models.session.commit()
+        self._onServersDiff(servers)
+        self._tryLoginless()
+
+    def _tryLoginless(self):
+        if self.fullPlayers and self.fullServers:
+            print("Reconnecting without login")
+            self.listener.setLogin(False)
+            self.listener.reconnect()
+
+    def _onPlayersDiff(self, diff):
+        for name, playerInfo in diff.items():
+
+            if playerInfo is None:
+                playerInfo = self._getPlayer(name, create=True)
+                playerInfo.lastActive = datetime.utcnow()
+                playerInfo.logonTime = None
+                playerInfo.mode = None
+
+            else:
+                player = self._getPlayer(name, updateOnline=True, create=True)
+
+                player.mode = playerInfo.get('mode', player.mode)
+                player.rank = playerInfo.get('rank', player.rank)
+                player.faction = playerInfo.get('faction', player.faction)
+                if 'color' in playerInfo:
+                    player.color = str.format('#{:02x}{:02x}{:02x}{:02x}', *playerInfo['color'])
+
+            models.session.commit()
+
+    def _onServersDiff(self, diff):
+        for name, serverInfo in diff.items():
+            if serverInfo is None:
+                models.session.query(ServerModel).filter_by(name=name).delete(synchronize_session='fetch')
+            else:
+
+                server = models.get_or_create(ServerModel, name=name)
+
+                if 'players' in serverInfo:
+
+                    def infos():
+                        playerInfos = serverInfo['players']
+                        for info in playerInfos:
+                            player = self._getPlayer(info['name'], info['ai'], updateOnline=False, create=True)
+                            yield (player.id, info)
+
+                    server.players = [ServerPlayerModel(playerId=id, side=info['side']) for id, info in infos()]
+
+                if 'state' in serverInfo:
+                    state = serverInfo['state']
+                    if state != server.state:
+                        if state == 'running':
+                            server.runningSince = datetime.utcnow()
+                        elif state == 'waiting':
+                            server.runningSince = None
+                    server.state = state
+
+                server.observers = serverInfo.get('observers', server.observers)
+                server.hidden = serverInfo.get('hidden', server.hidden)
+                server.type = serverInfo.get('type', server.type)
+
+            models.session.commit()
+
+    def _onGameReport(self, report):
+        try:
+            match = models.MatchModel(
+                server = report['serverName'],
+                type = report['type'],
+                winningSide = report['winningSide'],
+                time = report['time'])
+
+            models.session.add(match)
+
+            for player in report['players']:
+                playerId = self._getPlayer(player['name'], player['ai'], create=True).id
+                match.players.append(MatchPlayerModel(
+                    playerId = playerId,
+                    winner = player['side'] == report['winningSide'],
+                    side = player['side']))
+
+            models.session.commit()
+
+        except KeyError as e:
+            print(e)
+            models.session.rollback()
+
+    def _getPlayer(self, name, ai=False, updateOnline=False, create=False):
+        if create:
+            player = models.get_or_create(PlayerModel, name=name, ai=ai)
+        else:
+            player = models.session.query(PlayerModel).filter_by(name=name, ai=ai).one_or_none()
+            if player is None: return None
+
+        if updateOnline:
+            player.lastActive = player.logonTime = datetime.utcnow()
+
+        return player
