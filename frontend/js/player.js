@@ -7,7 +7,7 @@ $(document).ready(() => {
         $(document).attr('title', name);
 
         $.ajax({
-            url: '/api/player',
+            url: '/api/player/',
             data: {
                 name: name
             },
@@ -24,7 +24,7 @@ $(document).ready(() => {
         });
 
         $.ajax({
-            url: '/api/match',
+            url: '/api/match/',
             data: {
                 player: name
             },

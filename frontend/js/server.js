@@ -7,7 +7,7 @@ $(document).ready(() => {
         $(document).attr('title', `${name}`);
 
         $.ajax({
-            url: '/api/server',
+            url: '/api/server/',
             data: {
                 name: name
             },

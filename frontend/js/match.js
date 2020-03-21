@@ -5,7 +5,7 @@ $(document).ready(() => {
         let id = param.get('id')
 
         $.ajax({
-            url: '/api/match',
+            url: '/api/match/',
             data: {
                 matchId: id
             },

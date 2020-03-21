@@ -1,6 +1,6 @@
 $(document).ready(() => {
     $.ajax({
-        url: '/api/player',
+        url: '/api/player/',
         data: {
             online: true,
             order: 'rank_des'
@@ -17,7 +17,7 @@ $(document).ready(() => {
     });
 
     $.ajax({
-        url: '/api/server',
+        url: '/api/server/',
         data: {
             order: 'running_des'
         },
@@ -41,7 +41,7 @@ $(document).ready(() => {
     });
 
     $.ajax({
-        url: '/api/match',
+        url: '/api/match/',
         data: {
             order: 'finished_des'
         },
