@@ -1,7 +1,7 @@
 from datetime import datetime
 
 import models
-from models import PlayerModel, MatchModel, MatchPlayerModel
+from models import PlayerModel, MatchModel, MatchPlayerModel, ServerModel, ServerPlayerModel
 from istro_listener import IstroListener
 
 def _isTrue(string):
@@ -19,27 +19,8 @@ def _multiple(x):
     else:
         return [x]
 
-class Server:
-    class Player:
-        def __init__(self, name, side, ai=False):
-            self.name = name
-            self.side = side
-            self.ai = ai
-
-    def __init__(self, name):
-        self.name = name
-        self.players = []
-        self.observers = 0
-        self.type = None
-        self.state = None
-        self.hidden = False
-        self.runningSince = None
-
 class Istrolid:
     def __init__(self):
-        self.onlinePlayers = {}
-        self.servers = {}
-
         self.fullPlayers = False
         self.fullServers = False
 
@@ -58,11 +39,13 @@ class Istrolid:
         self.listener.close()
 
     def getPlayerInfo(self, name):
-        player = self._getPlayer(name, online=False)
-
+        player = self._getPlayer(name, updateOnline=False)
         if player is None: return None
+        return self._playerToInfo(player)
 
-        servers = [name for name,server in self.servers.items() if any([player.name == p.name for p in server.players])]
+    def _playerToInfo(self, player):
+        servers = [rst[0] for rst in (models.session.query(ServerModel.name)
+            .join(ServerPlayerModel).filter(ServerPlayerModel.playerId == player.id))]
 
         return {
             'id': player.id,
@@ -78,17 +61,24 @@ class Istrolid:
         }
 
     def getServerInfo(self, name):
-        server = self._getServer(name, False)
-
+        server = models.session.query(ServerModel).filter_by(name=name).one_or_none()
         if server is None: return None
+        return self._serverToInfo(server)
+
+    def _serverToInfo(self, server):
+
+        players = []
+        for player, serverPlayer in (models.session.query(PlayerModel, ServerPlayerModel)
+                .join(PlayerModel).filter(ServerPlayerModel.serverId == server.id)):
+            players.append({
+                'name': player.name,
+                'ai': player.ai,
+                'side': serverPlayer.side
+            })
 
         return {
             'name': server.name,
-            'players': [{
-                'name': p.name,
-                'side': p.side,
-                'ai': p.ai
-            } for p in server.players],
+            'players': players,
             'observers': server.observers,
             'type': server.type,
             'state': server.state,
@@ -98,19 +88,20 @@ class Istrolid:
 
     def getMatchInfo(self, matchId):
         match = models.session.query(MatchModel).filter_by(id=matchId).one_or_none()
-
         if match is None: return None
+        return self._matchToInfo(match)
+
+    def _matchToInfo(self, match):
 
         players = []
-        for matchPlayer in models.session.query(MatchPlayerModel).filter_by(matchId=match.id):
-            player = models.session.query(PlayerModel).filter_by(id=matchPlayer.playerId).one_or_none()
-            if player is not None:
-                players.append({
-                    'name': player.name,
-                    'ai': player.ai,
-                    'winner': matchPlayer.winner,
-                    'side': matchPlayer.side,
-                })
+        for player, matchPlayer in (models.session.query(PlayerModel, MatchPlayerModel)
+                .join(PlayerModel).filter(MatchPlayerModel.matchId == match.id)):
+            players.append({
+                'name': player.name,
+                'ai': player.ai,
+                'winner': matchPlayer.winner,
+                'side': matchPlayer.side,
+            })
 
 
         return {
@@ -124,10 +115,10 @@ class Istrolid:
         }
 
     def getPlayers(self, **query):
-        rst = models.session.query(PlayerModel.name)
+        rst = models.session.query(PlayerModel)
 
         if _isTrue(_single(query.get('online', ''))):
-            rst = rst.filter(PlayerModel.name.in_([p.name for p in self.onlinePlayers.values()]))
+            rst = rst.filter(PlayerModel.logonTime != None)
 
         if 'ai' in query:
             rst = rst.filter_by(ai=_isTrue(_single(query['ai'])))
@@ -146,66 +137,53 @@ class Istrolid:
         rst = rst.offset(_single(query.get('offset', 0)))
         rst = rst.limit(_single(query.get('limit', 50)))
 
-        return [self.getPlayerInfo(r[0]) for r in rst]
+        return [self._playerToInfo(r) for r in rst]
 
     def getServers(self, **query):
-        rst = []
-        for name, server in self.servers.items():
-            if 'running' in query:
-                if _isTrue(_single(query['running'])) != (server.runningSince is not None):
-                    continue
+        rst = models.session.query(ServerModel)
 
-            if 'type' in query:
-                if _single(query['type']).lower() != server.type.lower():
-                    continue
+        if 'running' in query:
+            if _isTrue(_single(query['running'])):
+                rst = rst.filter(ServerModel.runningSince != None)
+            else:
+                rst = rst.filter(ServerModel.runningSince == None)
 
-            if 'player' in query:
-                players = _multiple(query['player'])
-                if any([p.name not in players for p in server.players]):
-                    continue
+        if 'type' in query:
+            rst = rst.filter_by(type=_single(query['type']))
 
-            rst.append(server)
+        if 'player' in query:
+            players = _multiple(query['player'])
+            rst = (rst.join(ServerPlayerModel).join(PlayerModel)
+                    .filter(PlayerModel.name.in_(players)))
 
         if 'order' in query:
             order = _single(query['order'])
             if order == 'running_des':
-                rst.sort(key=lambda s: s.runningSince or datetime(3000, 1, 1), reverse=True)
+                rst.order_by(ServerModel.runningSince.desc())
             elif order == 'running_asc':
-                rst.sort(key=lambda s: s.runningSince or datetime(3000, 1, 1), reverse=False)
+                rst.order_by(ServerModel.runningSince.asc())
 
-        return [self.getServerInfo(r.name) for r in rst]
+        return [self._serverToInfo(r) for r in rst]
 
     def getMatches(self, **query):
-        rst = models.session.query(MatchModel.id)
-
-        def matchPlayer(name, winner=None):
-            matchPlayer = (models.session.query(MatchPlayerModel)
-                    .filter(models.MatchPlayerModel.matchId == models.MatchModel.id))
-
-            playerId = self._getPlayerId(name)
-            if playerId is not None:
-                matchPlayer = matchPlayer.filter_by(playerId=playerId)
-                if winner is not None:
-                    matchPlayer = matchPlayer.filter_by(winner=winner)
-            else:
-                matchPlayer.filter(False)
-
-            return matchPlayer
+        rst = models.session.query(MatchModel)
 
         if 'player' in query:
             players = _multiple(query['player'])
-            for name in players:
-                rst = rst.filter(matchPlayer(name).exists())
+            rst = (rst.join(MatchPlayerModel).join(PlayerModel)
+                    .filter(PlayerModel.name.in_(players)))
 
         if 'winner' in query:
             winners = _multiple(query['winner'])
-            for name in winners:
-                rst = rst.filter(matchPlayer(name, True).exists())
+            rst = (rst.join(MatchPlayerModel).join(PlayerModel)
+                    .filter(PlayerModel.name.in_(winners))
+                    .filter(MatchPlayerModel.winner == True))
 
         if 'loser' in query:
             losers = _multiple(query['loser'])
-            for name in losers:
-                rst = rst.filter(matchPlayer(name, False).exists())
+            rst = (rst.join(MatchPlayerModel).join(PlayerModel)
+                    .filter(PlayerModel.name.in_(losers))
+                    .filter(MatchPlayerModel.winner == False))
 
         if 'server' in query:
             rst = rst.filter_by(server=_single(query['server']))
@@ -227,19 +205,23 @@ class Istrolid:
         rst = rst.offset(_single(query.get('offset', 0)))
         rst = rst.limit(_single(query.get('limit', 50)))
 
-        return [self.getMatchInfo(r[0]) for r in rst]
+        return [self._matchToInfo(r) for r in rst]
 
     def _onPlayers(self, players):
         self.fullPlayers = True
-        # filter non existent players
-        self.onlinePlayers = {n:p for n,p in self.onlinePlayers.items() if p.name in players}
+        # update non online players
+        (models.session.query(PlayerModel)
+                .filter(PlayerModel.name.notin_(players.keys()))
+                .update({'logonTime': None, 'mode': None}, synchronize_session='fetch'))
+        models.session.commit()
         self._onPlayersDiff(players)
         self._tryLoginless()
 
     def _onServers(self, servers):
         self.fullServers = True
-        # filter non existent servers
-        self.servers = {n:s for n,s in self.servers.items() if s.name in servers}
+        # remove non online servers
+        models.session.query(ServerModel).filter(ServerModel.name.notin_(servers.keys())).delete(synchronize_session='fetch')
+        models.session.commit()
         self._onServersDiff(servers)
         self._tryLoginless()
 
@@ -250,47 +232,57 @@ class Istrolid:
             self.listener.reconnect()
 
     def _onPlayersDiff(self, diff):
-        for name, player in diff.items():
-            if player is None:
-                player = self._getPlayer(name, create=True)
-                player.lastActive = datetime.utcnow()
-                self.onlinePlayers.pop(player.id, None)
+        for name, playerInfo in diff.items():
+
+            if playerInfo is None:
+                playerInfo = self._getPlayer(name, create=True)
+                playerInfo.lastActive = datetime.utcnow()
+                playerInfo.logonTime = None
+                playerInfo.mode = None
+
             else:
-                oldPlayer = self._getPlayer(name, online=True, create=True)
+                player = self._getPlayer(name, updateOnline=True, create=True)
 
-                # database data
-                oldPlayer.rank = player.get('rank', oldPlayer.rank)
-                oldPlayer.faction = player.get('faction', oldPlayer.faction)
-                if 'color' in player:
-                    oldPlayer.color = str.format('#{:02x}{:02x}{:02x}{:02x}', *player['color'])
-                models.session.commit()
+                player.mode = playerInfo.get('mode', player.mode)
+                player.rank = playerInfo.get('rank', player.rank)
+                player.faction = playerInfo.get('faction', player.faction)
+                if 'color' in playerInfo:
+                    player.color = str.format('#{:02x}{:02x}{:02x}{:02x}', *playerInfo['color'])
 
-                # in-memory data
-                oldPlayer.mode = player.get('mode', oldPlayer.mode)
+            models.session.commit()
 
     def _onServersDiff(self, diff):
-        for name, server in diff.items():
-            if server is None:
-                self.servers.pop(name, None)
+        for name, serverInfo in diff.items():
+            if serverInfo is None:
+                models.session.query(ServerModel).filter_by(name=name).delete(synchronize_session='fetch')
             else:
-                oldServer = self._getServer(name, True)
-                if 'players' in server:
-                    oldServer.players = [
-                        Server.Player(p.get('name'), p.get('side'), p.get('ai')) for p in server['players']
-                    ]
 
-                if 'state' in server:
-                    state = server['state']
-                    if state != oldServer.state:
+                server = models.get_or_create(ServerModel, name=name)
+
+                if 'players' in serverInfo:
+
+                    def infos():
+                        playerInfos = serverInfo['players']
+                        for info in playerInfos:
+                            player = self._getPlayer(info['name'], info['ai'], updateOnline=False, create=True)
+                            yield (player.id, info)
+
+                    server.players = [ServerPlayerModel(playerId=id, side=info['side']) for id, info in infos()]
+
+                if 'state' in serverInfo:
+                    state = serverInfo['state']
+                    if state != server.state:
                         if state == 'running':
-                            oldServer.runningSince = datetime.utcnow()
+                            server.runningSince = datetime.utcnow()
                         elif state == 'waiting':
-                            oldServer.runningSince = None
-                    oldServer.state = state
+                            server.runningSince = None
+                    server.state = state
 
-                oldServer.observers = server.get('observers', oldServer.observers)
-                oldServer.hidden = server.get('hidden', oldServer.hidden)
-                oldServer.type = server.get('type', oldServer.type)
+                server.observers = serverInfo.get('observers', server.observers)
+                server.hidden = serverInfo.get('hidden', server.hidden)
+                server.type = serverInfo.get('type', server.type)
+
+            models.session.commit()
 
     def _onGameReport(self, report):
         try:
@@ -299,35 +291,31 @@ class Istrolid:
                 type = report['type'],
                 winningSide = report['winningSide'],
                 time = report['time'])
+
             models.session.add(match)
-            models.session.commit()
 
             for player in report['players']:
                 playerId = self._getPlayer(player['name'], player['ai'], create=True).id
-                models.session.add(MatchPlayerModel(
-                    matchId = match.id,
+                match.players.append(MatchPlayerModel(
                     playerId = playerId,
                     winner = player['side'] == report['winningSide'],
                     side = player['side']))
-                models.session.commit()
+
+            models.session.commit()
 
         except KeyError as e:
             print(e)
             models.session.rollback()
 
-    def _getPlayer(self, name, ai=False, online=False, create=False):
-        player = next((p for p in self.onlinePlayers.values() if p.name == name and p.ai == ai), None)
+    def _getPlayer(self, name, ai=False, updateOnline=False, create=False):
+        if create:
+            player = models.get_or_create(PlayerModel, name=name, ai=ai)
+        else:
+            player = models.session.query(PlayerModel).filter_by(name=name, ai=ai).one_or_none()
+            if player is None: return None
 
-        if player is None:
-            if create:
-                player = models.get_or_create(PlayerModel, name=name, ai=ai)
-            else:
-                player = models.session.query(PlayerModel).filter_by(name=name, ai=ai).one_or_none()
-                if player is None: return None
-
-            if online:
-                player.lastActive = player.logonTime = datetime.utcnow()
-                self.onlinePlayers[player.id] = player
+        if updateOnline:
+            player.lastActive = player.logonTime = datetime.utcnow()
 
         return player
 
@@ -335,11 +323,3 @@ class Istrolid:
         player = self._getPlayer(name, ai)
         if player is None: return None
         return player.id
-
-    def _getServer(self, name, online=False):
-        if name not in self.servers:
-            if online:
-                self.servers[name] = Server(name)
-            else:
-                return None
-        return self.servers[name]
