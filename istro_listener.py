@@ -1,6 +1,7 @@
 import time
 import json
 import os
+import logging
 
 import websocket
 from pymitter import EventEmitter
@@ -33,7 +34,7 @@ class IstroListener(EventEmitter):
         self.login = login
 
     def connect(self):
-        print("Starting IstroListener")
+        logging.info("Starting IstroListener")
 
         self.ws = websocket.WebSocketApp(self.root_address,
                 on_open=self._onOpen,
@@ -46,7 +47,7 @@ class IstroListener(EventEmitter):
             try:
                 cb(self.ws, *args)
             except Exception as e:
-                print("IstroListener callback error:", e)
+                logging.error("IstroListener callback error: %s", e)
 
         self.ws._callback = ws_callback
 
@@ -61,7 +62,7 @@ class IstroListener(EventEmitter):
             if self.stopped: break
             if not self.reconnecting: # add timeout between auto reconnects
                 time.sleep(max(5 - (time.time() - startTime), 1))
-            print("Reconnecting IstroListener")
+            logging.info("Reconnecting IstroListener")
 
     def close(self):
         if self.stopped: return
@@ -76,7 +77,7 @@ class IstroListener(EventEmitter):
             self.ws.close()
 
     def _onOpen(self, ws):
-        print("IstroListener connected")
+        logging.info("IstroListener connected")
         ws.send('["registerBot"]')
         if self.login:
             ws.send(f'["authSignIn",{{"email":"{email}","token":"{token}"}}]')
@@ -85,9 +86,9 @@ class IstroListener(EventEmitter):
         data = json.loads(msg);
 
         if data[0] == 'authError':
-            print("Login error:", data[1])
+            logging.error("Login error: %s", data[1])
         elif data[0] == 'login':
-            print("Logged in")
+            logging.info("Logged in")
 
         if len(data) == 1 and len(data[0]) == 1 and 'serverName' in data[0][0]:
             self.emit('gameReport', data[0][0])
@@ -96,9 +97,9 @@ class IstroListener(EventEmitter):
 
 
     def _onError(self, ws, err):
-        print("IstroListener Error:", err)
+        logging.error("IstroListener Error: %s", err)
         self.emit('error', err)
 
     def _onClose(self, ws):
-        print("IstroListener closed")
+        logging.info("IstroListener closed")
         self.emit('close', self.reconnecting)

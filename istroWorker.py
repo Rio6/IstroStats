@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 
 import models
@@ -48,7 +49,7 @@ class IstrolidWorker:
 
     def _tryLoginless(self):
         if self.fullPlayers and self.fullServers:
-            print("Reconnecting without login")
+            logging.info("Reconnecting without login")
             self.listener.setLogin(False)
             self.listener.reconnect()
 
@@ -131,7 +132,7 @@ class IstrolidWorker:
             models.session.commit()
 
         except KeyError as e:
-            print("Error adding new match:", e)
+            logging.error("Error adding new match: %s", e)
             models.session.rollback()
 
     # updateOnline: add player to online lis

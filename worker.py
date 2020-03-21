@@ -1,3 +1,4 @@
+import logging
 import signal
 
 import models
@@ -6,14 +7,16 @@ from istroWorker import IstrolidWorker
 istro = IstrolidWorker()
 
 def stop(*_):
-    print("Stopping worker")
+    logging.info("Stopping worker")
     istro.stop()
 
 def main():
+    logging.getLogger().setLevel(logging.INFO)
+
     signal.signal(signal.SIGINT, stop)
     signal.signal(signal.SIGTERM, stop)
 
-    print("Starting worker")
+    logging.info("Starting worker")
     istro.start()
 
 if __name__ == '__main__':
