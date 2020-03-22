@@ -181,10 +181,10 @@ class IstrolidAPI:
                     .filter(MatchPlayerModel.winner == False))
 
         if 'server' in query:
-            rst = rst.filter_by(server=_single(query['server']))
+            rst = rst.filter(MatchModel.server.in_(_multiple(query['server'])))
 
         if 'type' in query:
-            rst = rst.filter_by(type=_single(query['type']))
+            rst = rst.filter(MatchModel.type.in_(_multiple(query['type'])))
 
         if 'order' in query:
             order = _single(query['order'])
