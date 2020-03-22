@@ -4,32 +4,63 @@
         <meta charset="utf-8">
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
         <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+        <script src="/js/utils.js"></script>
         <script src="/js/player.js"></script>
         <title>Player</title>
     </head>
     <body>
-        <nav class="nav border">
-            <a class="nav-link" href="/index.html">Home</a>
-            <a class="nav-link" href="/players.html">Players</a>
-            <a class="nav-link" href="/servers.html">Servers</a>
-            <a class="nav-link" href="/matches.html">Matches</a>
-        </nav>
-        <h1 id="name">Player</h1>
-        Rank: <span id="rank"></span>
-        <br />
-        Faction: <span id="faction"></span>
-        <br />
-        Color: <span id="color"></span>
-        <br />
-        Mode: <span id="mode"></span>
-        <br />
-        Online Since: <span id="online-since"></span>
-        <br />
-        Last Active: <span id="last-active"></span>
-        <br />
-        Wins: <span id="wins"></span>
-        <br />
-        Loses: <span id="loses"></span>
+        <div class="container">
+            <nav class="nav border">
+                <a class="nav-link" href="/index.html">Home</a>
+                <a class="nav-link" href="/players.html">Players</a>
+                <a class="nav-link" href="/servers.html">Servers</a>
+                <a class="nav-link" href="/matches.html">Matches</a>
+            </nav>
+
+            <div class="row">
+                <div class="col">
+                    <h3 class="text-center mt-4">Player info</h3>
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <span id="name" class="align-middle display-4"></span>
+                            <img id="rank-img" class="float-right align-middle border-dark rounded-circle" width="80px" />
+                        </li>
+                        <li class="list-group-item">
+                            Rank: <span id="rank"></span>
+                        </li>
+                        <li class="list-group-item">
+                            Faction: <span id="faction"></span>
+                        </li>
+                        <li class="list-group-item">
+                            Color: <span id="color"></span>
+                        </li>
+                        <li class="list-group-item">
+                            Mode: <span id="mode"></span>
+                        </li>
+                        <li class="list-group-item">
+                            Server: <span id="servers"></span>
+                        </li>
+                        <li class="list-group-item">
+                            Online Since: <span id="online-since"></span>
+                        </li>
+                        <li class="list-group-item">
+                            Last Active: <span id="last-active"></span>
+                        </li>
+                        <li class="list-group-item">
+                            Wins: <span id="wins"></span>
+                        </li>
+                        <li class="list-group-item">
+                            Loses: <span id="loses"></span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="col text-center">
+                    <h3 class="mt-4">Recent matches</h3>
+                    <ul id="matches" class="list-group"></ul>
+                </div>
+            </div>
+        </div>
     </body>
 </html>
 

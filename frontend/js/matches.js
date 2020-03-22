@@ -3,6 +3,7 @@ var config = {
     orderDes: true,
     filters: {
         server: [],
+        player: [],
         type: []
     },
     page: 0,
@@ -56,7 +57,7 @@ function reload() {
         offset: config.page * config.rows
     };
 
-    for(let f of ['server', 'type']) {
+    for(let f in config.filters) {
         if(config.filters[f].length > 0) {
             data[f] = config.filters[f];
         }
@@ -79,21 +80,15 @@ function refresh() {
 
     // filter tags
     $('#filters > div').remove();
-    for(let i in config.filters.server) {
-        let filter = config.filters.server[i]
-        $('#filters').append(`
-            <div class="btn btn-info" onclick="removeFilter('server', ${i})">
-                server=${filter}
+    for(let field in config.filters) {
+        let filters = config.filters[field]
+        for(let i in filters) {
+            $('#filters').append(`
+            <div class="btn btn-info" onclick="removeFilter('${field}', ${i})">
+                ${field}=${filters[i]}
             </div>
         `);
-    }
-    for(let i in config.filters.type) {
-        let filter = config.filters.type[i]
-        $('#filters').append(`
-            <div class="btn btn-info" onclick="removeFilter('type', ${i})">
-                type=${filter}
-            </div>
-        `);
+        }
     }
 
     // matches
