@@ -24,7 +24,7 @@ function refresh() {
     $('#finished').text(formatTime(match.finished));
     $('#server').text(match.server);
     $('#type').text(match.type);
-    $('#winning-side').text(match.winningSide !== '0' && match.winningSide || "none");
+    $('#winning-side').text(match.winningSide || "none");
     $('#time').text(formatSeconds(match.time));
 
     $('#players > li').remove();

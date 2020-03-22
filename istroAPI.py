@@ -90,7 +90,7 @@ class IstrolidAPI:
             'server': match.server,
             'finished': match.finished,
             'type': match.type,
-            'winningSide': match.winningSide,
+            'winningSide': match.winningSide if match.winningSide != '0' else None,
             'time': match.time,
             'players': players
         }

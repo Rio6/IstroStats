@@ -53,7 +53,8 @@ function reload() {
         url: '/api/match/',
         data: {
             player: name,
-            order: 'finished_des'
+            order: 'finished_des',
+            limit: 100
         },
         success: data => {
             matches = data.matches;
@@ -76,17 +77,31 @@ function refresh() {
 
     $('#matches > li').remove();
 
-    let win = 0, lose = 0, total = 0;
+    let total = 0, games = 0;
+    let wins = {
+        '1v1': {wins: 0, games: 0},
+        '2v2': {wins: 0, games: 0},
+        '3v3': {wins: 0, games: 0}
+    };
+
     for(let match of matches) {
 
         let player = match.players.find(p => p.name == name);
         if(!player) continue;
 
-        if(player.winner)
-            win++;
-        else
-            lose++
-        total++
+        if(match.winningSide && match.type in wins) {
+            for(let type in wins) {
+                if(match.type === type) {
+                    if(player.winner)
+                        wins[type].wins++;
+                    wins[type].games++;
+                }
+            }
+
+            if(player.winner)
+                total++;
+            games++;
+        }
 
         if(total < 20) {
             $('#matches').append(`
@@ -101,15 +116,18 @@ function refresh() {
                         <a href="/server.html?name=${match.server}">
                             ${match.server}
                         </a>
-                        ${player.winner ? "won" : "lost"}
+                        ${match.winningSide ? player.winner ? "won" : "lost" : "draw"}
                     </div>
                 </li>
             `);
         }
     }
 
-    $('#wins').text(`${win}/${total} ${(win/total*100).toFixed(0)}%`);
-    $('#loses').text(`${lose}/${total} ${(lose/total*100).toFixed(0)}%`);
+    $('#games').text(games);
+    $('#total-rate').text(`${total/games*100}%`);
+    for(let type in wins) {
+        $(`#${type}-rate`).text(`${wins[type].wins/wins[type].games*100}%`);
+    }
 }
 
 $(document).ready(() => {
