@@ -1,17 +1,23 @@
 var config = {
-    order: 'name',
+    order: 'rank',
     orderDes: true,
     onlineOnly: false,
+    search: null,
     page: 0,
     rows: 20,
-    reloadTime: 10
 };
 
 var playerData = null;
-var reloadTimeout = null;
 
 function updateConfig() {
     config.onlineOnly = $('#online-box').is(':checked');
+
+    let val = $('#search-text').val();
+    if(val)
+        config.search = `%${val.replace(/%/g, '[%]')}%`;
+    else
+        config.search = null;
+
     config.page = 0;
     reload();
 }
@@ -32,9 +38,7 @@ function setPage(page) {
 }
 
 function reload() {
-
-    if(reloadTimeout) clearTimeout(reloadTimeout);
-    reloadTimeout = setTimeout(reload, config.reloadTime * 1000);
+    pollTimeout(reload);
 
     let data = {
         order: config.order + (config.orderDes ? "_des" : "_asc"),
@@ -44,6 +48,7 @@ function reload() {
     };
 
     if(config.onlineOnly) data.online = true;
+    if(config.search) data.search = config.search;
 
     $.ajax({
         url: '/api/player/',

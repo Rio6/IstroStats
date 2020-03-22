@@ -1,11 +1,9 @@
 var config = {
     order: 'runningSince',
     orderDes: true,
-    reloadTime: 10
 };
 
 var servers = null;
-var reloadTimeout = null;
 
 function sortBy(order) {
     if(config.order === order) {
@@ -18,9 +16,7 @@ function sortBy(order) {
 }
 
 function reload() {
-
-    if(reloadTimeout) clearTimeout(reloadTimeout);
-    reloadTimeout = setTimeout(reload, config.reloadTime * 1000);
+    pollTimeout(reload);
 
     $.ajax({
         url: '/api/server/',

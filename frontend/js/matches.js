@@ -8,15 +8,13 @@ var config = {
     },
     page: 0,
     rows: 20,
-    reloadTime: 20
 };
 
 var matchData = null;
-var reloadTimeout = null;
 
 function filter(field) {
     let value = $('#filter-text').val();
-    if(!config.filters[field].includes(value)) {
+    if(value && !config.filters[field].includes(value)) {
         config.filters[field].push(value);
         config.page = 0;
         reload();
@@ -46,9 +44,7 @@ function setPage(page) {
 }
 
 function reload() {
-
-    if(reloadTimeout) clearTimeout(reloadTimeout);
-    reloadTimeout = setTimeout(reload, config.reloadTime * 1000);
+    pollTimeout(reload);
 
     let data = {
         order: config.order + (config.orderDes ? "_des" : "_asc"),

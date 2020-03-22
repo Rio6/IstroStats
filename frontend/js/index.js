@@ -1,15 +1,7 @@
-var config = {
-    reloadTime: 10
-};
-
 var datas = {};
 
-var reloadTimeout = null;
-
 function reload() {
-
-    if(reloadTimeout) clearTimeout(reloadTimeout);
-    reloadTimeout = setTimeout(reload, config.reloadTime * 1000);
+    pollTimeout(reload);
 
     $.ajax({
         url: '/api/player/',

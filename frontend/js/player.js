@@ -1,11 +1,6 @@
-var config = {
-    reloadTime: 10
-};
-
 var name = null;
 var player = null;
 var matches = null;
-var reloadTimeout = null;
 
 function rankImage(rank) {
     if (rank < 25) {
@@ -42,9 +37,7 @@ function rankImage(rank) {
 };
 
 function reload() {
-
-    if(reloadTimeout) clearTimeout(reloadTimeout);
-    reloadTimeout = setTimeout(reload, config.reloadTime * 1000);
+    pollTimeout(reload);
 
     $.ajax({
         url: '/api/player/',
@@ -78,7 +71,7 @@ function refresh() {
     $('#color').text(player.color);
     $('#mode').text(player.mode);
     $('#servers').text(player.servers);
-    $('#online-since').text(elapsed(player.logonTime) || 'Offline');
+    $('#online-time').text(elapsed(player.logonTime) || 'Offline');
     $('#last-active').text(formatTime(player.lastActive));
 
     $('#matches > li').remove();

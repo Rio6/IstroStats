@@ -15,3 +15,14 @@ function formatTime(time) {
     let date = new Date(time*1000);
     return date.toLocaleString();
 }
+
+var poll = null;
+function pollTimeout(fn, time=10000) {
+    if(poll) clearTimeout(poll);
+    poll = setTimeout(() => {
+        if(document.visibilityState === 'visible') {
+            fn();
+        }
+        pollTimeout(fn, time);
+    }, time);
+}

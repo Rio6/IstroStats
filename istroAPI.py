@@ -107,6 +107,9 @@ class IstrolidAPI:
         if 'ai' in query:
             rst = rst.filter_by(ai=_bool(_single(query['ai'])))
 
+        if 'search' in query:
+            rst = rst.filter(PlayerModel.name.ilike(_single(query['search'])))
+
         if 'order' in query:
             order = _single(query['order'])
             if order == 'rank_des':

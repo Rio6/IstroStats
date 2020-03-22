@@ -21,10 +21,15 @@
 
             <h1 class="text-center">Players</h1>
 
-            <div class="form-check">
-                <input id="online-box" type="checkbox" class="form-check-input" onclick="updateConfig()">
-                    Online only
-                </input>
+            <div class="form-inline mb-2">
+                <button class="btn btn-secondary mr-2" onclick="updateConfig()">
+                    search
+                </button>
+                <input type="text" id="search-text" onkeyup="if(event.keyCode === 13) updateConfig();" />
+                <span class="form-check ml-2">
+                    <input id="online-box" type="checkbox" class="form-check-input" onclick="updateConfig()" />
+                    <label for="online-box">Online only</label>
+                </span>
             </div>
 
             <table id="players" class="table">
@@ -33,7 +38,7 @@
                     <th onclick="sortBy('rank')">Rank</th>
                     <th>Room</th>
                     <th>Mode</th>
-                    <th onclick="sortBy('logon')">Time</th>
+                    <th onclick="sortBy('logon')">Online Time</th>
                 </tr></thead>
             </table>
 
