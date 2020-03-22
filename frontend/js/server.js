@@ -1,4 +1,3 @@
-
 var name = null;
 var server = null;
 
@@ -54,8 +53,7 @@ $(document).ready(() => {
         name = param.get('name')
         $(document).attr('title', name);
         reload();
-        refresh();
     }
 });
 
-//setInterval(refresh, 1000);
+setInterval(refresh, 1000);

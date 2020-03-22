@@ -81,9 +81,8 @@ function refresh() {
 
         let player = match.players.find(p => p.name == name);
         if(!player) continue;
-        let victory = player.side == match.winningSide;
 
-        if(victory)
+        if(player.winner)
             win++;
         else
             lose++
@@ -102,7 +101,7 @@ function refresh() {
                         <a href="/server.html?name=${match.server}">
                             ${match.server}
                         </a>
-                        ${victory ? "won" : "lost"}
+                        ${player.winner ? "won" : "lost"}
                     </div>
                 </li>
             `);
