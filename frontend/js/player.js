@@ -70,7 +70,7 @@ function refresh() {
     $('#faction').text(player.faction);
     $('#color').text(player.color);
     $('#mode').text(player.mode);
-    $('#servers').text(player.servers);
+    $('#servers').html(player.servers.map(s => `<a href="/server.html?name=${s}">${s}</a>`));
     $('#online-time').text(elapsed(player.logonTime) || 'Offline');
     $('#last-active').text(formatTime(player.lastActive));
 
@@ -91,17 +91,21 @@ function refresh() {
 
         if(total < 20) {
             $('#matches').append(`
-            <li class="list-group-item">
-                <a href="/match.html?id=${match.id}">
-                    ${formatTime(match.finished)}
-                </a>
-                ${match.type}
-                <a href="/server.html?name=${match.server}">
-                    ${match.server}
-                </a>
-                ${victory ? "won" : "lost"}
-            </li>
-        `);
+                <li class="list-group-item">
+                    <div class="text-right float-left pr-1 w-50">
+                        <a href="/match.html?id=${match.id}">
+                            ${formatTime(match.finished)}
+                        </a>
+                    </div>
+                    <div class="text-left float-right pl-1 w-50">
+                        ${match.type}
+                        <a href="/server.html?name=${match.server}">
+                            ${match.server}
+                        </a>
+                        ${victory ? "won" : "lost"}
+                    </div>
+                </li>
+            `);
         }
     }
 

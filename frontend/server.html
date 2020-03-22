@@ -9,26 +9,42 @@
         <title>Server</title>
     </head>
     <body>
-        <nav class="nav border">
-            <a class="nav-link" href="/index.html">Home</a>
-            <a class="nav-link" href="/players.html">Players</a>
-            <a class="nav-link" href="/servers.html">Servers</a>
-            <a class="nav-link" href="/matches.html">Matches</a>
-        </nav>
-        <h1>Server</h1>
-        name: <span id="name"></span>
-        <br />
-        Type: <span id="type"></span>
-        <br />
-        State: <span id="state"></span>
-        <br />
-        Observers: <span id="observers"></span>
-        <br />
-        Running for: <span id="run-time"></span>
-        <br />
-        <div id="players"></div>
+        <div class="container">
+            <nav class="nav border">
+                <a class="nav-link" href="/index.html">Home</a>
+                <a class="nav-link" href="/players.html">Players</a>
+                <a class="nav-link" href="/servers.html">Servers</a>
+                <a class="nav-link" href="/matches.html">Matches</a>
+            </nav>
+
+            <div class="row">
+                <div class="col">
+                    <h3 class="text-center mt-4">Player Info</h3>
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <span id="name" class="align-middle display-4"></span>
+                        </li>
+                        <li class="list-group-item">
+                            Mode: <span id="type"></span>
+                        </li>
+                        <li class="list-group-item">
+                            State: <span id="state"></span>
+                        </li>
+                        <li class="list-group-item">
+                            Players: <span id="observers"></span>
+                        </li>
+                        <li class="list-group-item">
+                            Running For: <span id="run-time"></span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="col">
+                    <h3 class="mt-4 text-center">Players</h3>
+                    <ul id="players" class="list-group"></ul>
+                </div>
+            </div>
+        </div>
     </body>
 </html>
-
-
 
