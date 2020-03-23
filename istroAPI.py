@@ -52,6 +52,10 @@ class IstrolidAPI:
                 rst = rst.order_by(PlayerModel.name.desc())
             elif order == 'name_asc':
                 rst = rst.order_by(PlayerModel.name.asc())
+            elif order == 'faction_des':
+                rst = rst.order_by(PlayerModel.faction.desc())
+            elif order == 'faction_asc':
+                rst = rst.order_by(PlayerModel.faction.asc())
             elif order == 'logon_des':
                 rst = rst.order_by(PlayerModel.logonTime.asc().nullslast(), PlayerModel.lastActive.desc())
             elif order == 'logon_asc':

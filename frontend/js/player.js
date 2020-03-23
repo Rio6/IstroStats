@@ -68,7 +68,10 @@ function refresh() {
     if(!player) return;
     $('#rank-img').css('background-color', player.color).attr('src', 'http://www.istrolid.com/img/ui/rank/' + rankImage(player.rank));
     $('#rank').text(player.rank);
-    $('#faction').text(player.faction);
+    if(player.faction)
+        $('#faction').html(`<a href="/faction.html?name=${player.faction}">${player.faction}</a>`);
+    else
+        $('#faction').text('');
     $('#color').text(player.color);
     $('#mode').text(player.mode);
     $('#servers').html(player.servers.map(s => `<a href="/server.html?name=${s}">${s}</a>`));
@@ -80,6 +83,8 @@ function refresh() {
     let total = 0, games = 0;
     let wins = {
         '1v1': {wins: 0, games: 0},
+        '1v1r': {wins: 0, games: 0},
+        '1v1t': {wins: 0, games: 0},
         '2v2': {wins: 0, games: 0},
         '3v3': {wins: 0, games: 0}
     };
@@ -125,9 +130,18 @@ function refresh() {
     }
 
     $('#games').text(games);
-    $('#total-rate').text(`${total/games*100}%`);
+    if(games > 0)
+        $('#total-rate').text(`${total}/${games} (${Math.round(total/games*100)}%)`);
+    else
+        $('#total-rate').text("N/A");
+
     for(let type in wins) {
-        $(`#${type}-rate`).text(`${wins[type].wins/wins[type].games*100}%`);
+        if(wins[type].games > 0) {
+            let wins2 = wins[type].wins, games = wins[type].games;
+            $(`#${type}-rate`).text(`${wins2}/${games} (${Math.round(wins2/games*100)}%)`);
+        } else {
+            $(`#${type}-rate`).text("N/A");
+        }
     }
 }
 

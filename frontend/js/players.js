@@ -72,6 +72,7 @@ function refresh() {
         $('#players').append(`
             <tr>
                 <td><a href="/player.html?name=${player.name}">${player.name}</a></td>
+                <td>${player.faction ? `<a href="/faction.html?name=${player.faction}">${player.faction}</a>` : ''}</td>
                 <td>${player.rank}</td>
                 <td>${player.servers.map(s => `<a href="/server.html?name=${s}">${s}</a>`)}</td>
                 <td>${player.mode}</td>
