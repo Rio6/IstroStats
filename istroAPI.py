@@ -192,6 +192,9 @@ class IstrolidAPI:
         if 'name' in query:
             rst = rst.filter_by(faction=query['name'])
 
+        if 'search' in query:
+            rst = rst.filter(PlayerModel.faction.ilike(_single(query['search'])))
+
         if 'order' in query:
             order = _single(query['order'])
             if order == 'playercount_des':

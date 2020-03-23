@@ -1,11 +1,24 @@
 var config = {
     order: 'playercount',
     orderDes: true,
+    seatch: null,
     page: 0,
     rows: 20,
 };
 
 var factionData = null;
+
+function updateConfig() {
+    let val = $('#search-text').val();
+    if(val)
+        config.search = `%${val.replace(/%/g, '[%]')}%`;
+    else
+        config.search = null;
+
+    config.page = 0;
+    reload();
+}
+
 
 function sortBy(order) {
     if(config.order === order) {
@@ -25,13 +38,17 @@ function setPage(page) {
 function reload() {
     pollTimeout(reload);
 
+    let data = {
+        order: config.order + (config.orderDes ? "_des" : "_asc"),
+        limit: config.rows,
+        offset: config.page * config.rows
+    };
+
+    if(config.search) data.search = config.search;
+
     $.ajax({
         url: '/api/faction/',
-        data: {
-            order: config.order + (config.orderDes ? "_des" : "_asc"),
-            limit: config.rows,
-            offset: config.page * config.rows
-        },
+        data: data,
         success: data => {
             factionData = data;
             refresh();

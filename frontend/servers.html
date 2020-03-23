@@ -21,7 +21,7 @@
 
             <h1 class="text-center">Servers</h1>
 
-            <table id="servers" class="table">
+            <table class="table">
                 <thead><tr>
                     <th onclick="sortBy('name')">Name</th>
                     <th onclick="sortBy('type')">Mode</th>
@@ -29,6 +29,11 @@
                     <th onclick="sortBy('observers')">Players</th>
                     <th onclick="sortBy('runningSince')">Running</th>
                 </tr></thead>
+                <tbody id="servers">
+                    <tr><td>
+                        Loading
+                    </td></tr>
+                </tbody>
             </table>
     </body>
 </html>

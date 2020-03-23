@@ -38,7 +38,7 @@
 
             <div id="filters"></div>
 
-            <table id="matches" class="table mt-2">
+            <table class="table mt-2">
                 <thead><tr>
                     <th onclick="sortBy('finished')">Finished</th>
                     <th>Server</th>
@@ -47,6 +47,11 @@
                     <th onclick="sortBy('time')">Time</th>
                     <th>Players</th>
                 </tr></thead>
+                <tbody id="matches">
+                    <tr><td>
+                        Loading
+                    </td></tr>
+                </tbody>
             </table>
 
             <ul id="page-button" class="pagination"></ul>

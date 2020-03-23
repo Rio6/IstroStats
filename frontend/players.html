@@ -34,7 +34,7 @@
                 </span>
             </div>
 
-            <table id="players" class="table">
+            <table class="table">
                 <thead><tr>
                     <th onclick="sortBy('name')">Name</th>
                     <th onclick="sortBy('faction')">Faction</th>
@@ -43,6 +43,11 @@
                     <th>Mode</th>
                     <th onclick="sortBy('logon')">Active</th>
                 </tr></thead>
+                <tbody id="players" >
+                    <tr><td>
+                        Loading
+                    </td></tr>
+                </tbody>
             </table>
 
             <ul id="page-button" class="pagination"></ul>
