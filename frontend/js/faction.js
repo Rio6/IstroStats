@@ -20,12 +20,13 @@ function refresh() {
     $('#name').text(name);
 
     if(!faction) return;
-    $('#rank').text(faction.rank);
+    $('#rank').text(Math.round(faction.rank));
     $('#player-count').text(faction.players.length);
     $('#last-active').text(formatTime(faction.lastActive));
 
     $('#players > li').remove();
 
+    faction.players.sort((a, b) => b.lastActive - a.lastActive);
     for(let player of faction.players) {
         $('#players').append(`
             <li class="list-group-item">
