@@ -185,7 +185,11 @@ class IstrolidAPI:
 
     def getFactions(self, **query):
         rst = (models.session.query(PlayerModel)
-                .with_entities(PlayerModel.faction, func.avg(PlayerModel.rank), func.max(PlayerModel.lastActive))
+                .with_entities(
+                    PlayerModel.faction,
+                    func.count(PlayerModel.faction),
+                    func.avg(PlayerModel.rank),
+                    func.max(PlayerModel.lastActive))
                 .filter(PlayerModel.faction != None, PlayerModel.faction != '')
                 .group_by(PlayerModel.faction))
 
@@ -219,9 +223,15 @@ class IstrolidAPI:
         rst = rst.offset(_single(query.get('offset', 0)))
         rst = rst.limit(_single(query.get('limit', 50)))
 
+
         return {
             'count': count,
-            'factions': [self._factionToInfo(*r) for r in rst]
+            'factions': [{
+                'name': r[0],
+                'size': r[1],
+                'rank': r[2],
+                'lastActive': r[3]
+            } for r in rst]
         }
 
     def _playerToInfo(self, player):
@@ -283,14 +293,4 @@ class IstrolidAPI:
             'winningSide': match.winningSide if match.winningSide != '0' else None,
             'time': match.time,
             'players': players
-        }
-
-    def _factionToInfo(self, name, rank, active):
-        players = models.session.query(PlayerModel).filter_by(faction=name)
-
-        return {
-            'name': name,
-            'rank': rank,
-            'lastActive': active,
-            'players': [self._playerToInfo(p) for p in players]
         }

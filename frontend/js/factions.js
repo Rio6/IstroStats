@@ -68,7 +68,7 @@ function refresh() {
         $('#factions').append(`
             <tr>
                 <td><a href="/faction.html?name=${faction.name}">${faction.name}</a></td>
-                <td>${faction.players.length}</td>
+                <td>${faction.size}</td>
                 <td>${Math.round(faction.rank)}</td>
                 <td>${formatTime(faction.lastActive)}</td>
             </tr>

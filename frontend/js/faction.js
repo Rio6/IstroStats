@@ -11,9 +11,32 @@ function reload() {
         },
         success: data => {
             faction = data.factions[0];
-            refresh();
         }
     });
+
+    let sendPlayerRequest = (offset=0) => {
+        $.ajax({
+            url: '/api/player/',
+            data: {
+                faction: name,
+                offset: offset,
+            },
+            success: nextPlayerData
+        });
+    };
+
+    let nextPlayerData = data => {
+        if(!faction) return;
+        if(!faction.players) faction.players = [];
+
+        faction.players.splice(-1, 0, ...data.players);
+
+        if(faction.players.length < data.count) {
+            sendPlayerRequest(faction.players.length);
+        }
+    };
+
+    sendPlayerRequest();
 }
 
 function refresh() {
@@ -26,20 +49,22 @@ function refresh() {
 
     $('#players > li').remove();
 
-    faction.players.sort((a, b) => b.lastActive - a.lastActive);
-    for(let player of faction.players) {
-        $('#players').append(`
-            <li class="list-group-item">
-                <div class="text-right float-left pr-1 w-50">
-                    <a href="/player.html?name=${player.name}">
-                        ${player.name}
-                    </a>
-                </div>
-                <div class="text-left float-right pl-1 w-50">
-                    ${elapsed(player.logonTime) || formatTime(player.lastActive)}
-                </div>
-            </li>
-        `);
+    if(faction.players) {
+        faction.players.sort((a, b) => b.lastActive - a.lastActive);
+        for(let player of faction.players) {
+            $('#players').append(`
+                <li class="list-group-item">
+                    <div class="text-right float-left pr-1 w-50">
+                        <a href="/player.html?name=${player.name}">
+                            ${player.name}
+                        </a>
+                    </div>
+                    <div class="text-left float-right pl-1 w-50">
+                        ${elapsed(player.logonTime) || formatTime(player.lastActive)}
+                    </div>
+                </li>
+            `);
+        }
     }
 }
 
