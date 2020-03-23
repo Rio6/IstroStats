@@ -26,3 +26,16 @@ function pollTimeout(fn, time=15000) {
         pollTimeout(fn, time);
     }, time);
 }
+
+function compare(field, reverse, nulls) {
+    return (a, b) => {
+        let af = a[field], bf = b[field];
+        if(af === null) af = nulls;
+        if(bf === null) bf = nulls;
+        let rst = af - bf;
+        if(isNaN(rst))
+            rst = ('' + af).localeCompare(bf)
+        if(reverse) rst = -rst;
+        return rst;
+    };
+}

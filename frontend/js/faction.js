@@ -50,7 +50,7 @@ function refresh() {
     $('#players > li').remove();
 
     if(faction.players) {
-        faction.players.sort((a, b) => b.lastActive - a.lastActive);
+        faction.players.sort(compare('lastActive', true));
         for(let player of faction.players) {
             $('#players').append(`
                 <li class="list-group-item">

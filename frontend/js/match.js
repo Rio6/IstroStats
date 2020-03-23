@@ -29,7 +29,7 @@ function refresh() {
 
     $('#players > li').remove();
 
-    match.players.sort((a, b) => b.winner - a.winner);
+    match.players.sort(compare('winner', true));
     for(let player of match.players) {
         $('#players').append(`
             <li class="list-group-item">

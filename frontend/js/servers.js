@@ -32,14 +32,7 @@ function refresh() {
 
     $('#servers > tr').remove();
 
-    let compare = (field) => (a, b) => {
-        if(config.orderDes)
-            return ('' + b[field]).localeCompare(a[field])
-        else
-            return ('' + a[field]).localeCompare(b[field])
-    };
-
-    servers.sort(compare(config.order))
+    servers.sort(compare(config.order, config.orderDes, Infinity))
 
     for(let server of servers) {
         if(server.hidden) continue;

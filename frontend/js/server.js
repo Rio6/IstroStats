@@ -28,6 +28,7 @@ function refresh() {
 
     $('#players > li').remove();
 
+    server.players.sort(compare('side'));
     for(let player of server.players) {
         $('#players').append(`
             <li class="list-group-item">
