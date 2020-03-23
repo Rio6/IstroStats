@@ -3,10 +3,10 @@
 import os
 import datetime
 import json
+from decimal import Decimal
 import cherrypy
 
 from istroAPI import IstrolidAPI
-import models
 
 istro = IstrolidAPI()
 
