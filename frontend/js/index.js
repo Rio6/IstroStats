@@ -16,11 +16,8 @@ function reload() {
 
     $.ajax({
         url: '/api/server/',
-        data: {
-            order: 'running_des'
-        },
         success: ({servers}) => {
-            datas.servers = servers;
+            datas.servers = servers.sort((a, b) => (b.runningSince || Infinity) - (a.runningSince || Infinity));
         }
     });
 
@@ -72,8 +69,7 @@ function refresh() {
                     <a href="/match.html?id=${match.id}">
                         ${match.type} ${match.server}
                     </a>
-                    ${Math.floor(match.time/60).toString().padStart(2, '0')}:
-                    ${(match.time%60).toFixed().padStart(2, '0')}
+                    ${formatSeconds(match.time)}
                 </li>
             `);
         }

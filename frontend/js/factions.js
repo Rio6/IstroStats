@@ -1,26 +1,11 @@
 var config = {
-    order: 'rank',
+    order: 'playercount',
     orderDes: true,
-    onlineOnly: false,
-    search: null,
     page: 0,
     rows: 20,
 };
 
-var playerData = null;
-
-function updateConfig() {
-    config.onlineOnly = $('#online-box').is(':checked');
-
-    let val = $('#search-text').val();
-    if(val)
-        config.search = `%${val.replace(/%/g, '[%]')}%`;
-    else
-        config.search = null;
-
-    config.page = 0;
-    reload();
-}
+var factionData = null;
 
 function sortBy(order) {
     if(config.order === order) {
@@ -40,44 +25,35 @@ function setPage(page) {
 function reload() {
     pollTimeout(reload);
 
-    let data = {
-        order: config.order + (config.orderDes ? "_des" : "_asc"),
-        ai: false,
-        limit: config.rows,
-        offset: config.page * config.rows
-    };
-
-    if(config.onlineOnly) data.online = true;
-    if(config.search) data.search = config.search;
-
     $.ajax({
-        url: '/api/player/',
-        data: data,
+        url: '/api/faction/',
+        data: {
+            order: config.order + (config.orderDes ? "_des" : "_asc"),
+            limit: config.rows,
+            offset: config.page * config.rows
+        },
         success: data => {
-            playerData = data;
+            factionData = data;
             refresh();
         }
     });
 }
 
 function refresh() {
-    if(!playerData) return;
+    if(!factionData) return;
 
-    // players
-    $('#players > tr').remove();
+    // factions
+    $('#factions > tr').remove();
 
-    let {count, players} = playerData;
+    let {count, factions} = factionData;
 
-    for(let player of players) {
-        $('#players').append(`
+    for(let faction of factions) {
+        $('#factions').append(`
             <tr>
-                <td><a href="/player.html?name=${player.name}">${player.name}</a></td>
-                <td>${player.rank}</td>
-                <td>${player.servers.map(s => `<a href="/server.html?name=${s}">${s}</a>`)}</td>
-                <td>${player.mode}</td>
-                <td>
-                    ${elapsed(player.logonTime) || formatTime(player.lastActive)}
-                </td>
+                <td><a href="/faction.html?name=${faction.name}">${faction.name}</a></td>
+                <td>${faction.players.length}</td>
+                <td>${Math.round(faction.rank)}</td>
+                <td>${formatTime(faction.lastActive)}</td>
             </tr>
         `);
     }
@@ -120,5 +96,6 @@ function refresh() {
     `);
 }
 
-$(document).ready(updateConfig);
+$(document).ready(reload);
 setInterval(refresh, 1000);
+

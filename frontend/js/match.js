@@ -7,10 +7,10 @@ function reload() {
     $.ajax({
         url: '/api/match/',
         data: {
-            matchId: id
+            id: id
         },
         success: data => {
-            match = data;
+            match = data.matches[0];
             refresh();
         }
     });
@@ -22,14 +22,14 @@ function refresh() {
     $(document).attr('title', `${match.type} ${match.server}`);
 
     $('#finished').text(formatTime(match.finished));
-    $('#server').text(match.server);
+    $('#server').html(`<a href="/server.html?name=${match.server}">${match.server}</a>`);
     $('#type').text(match.type);
     $('#winning-side').text(match.winningSide || "none");
     $('#time').text(formatSeconds(match.time));
 
     $('#players > li').remove();
 
-    match.players.sort((a, b) => a.winner - b.winner);
+    match.players.sort((a, b) => b.winner - a.winner);
     for(let player of match.players) {
         $('#players').append(`
             <li class="list-group-item">

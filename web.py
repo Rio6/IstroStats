@@ -30,39 +30,35 @@ class PlayerCtl:
     @cherrypy.expose
     @cherrypy.tools.json_out()
     def index(self, **kwargs):
-        if 'name' in kwargs:
-            return istro.getPlayerInfo(kwargs['name'])
-        else:
-            return istro.getPlayers(**kwargs)
+        return istro.getPlayers(**kwargs)
 
 @cherrypy.popargs('name')
 class ServerCtl:
     @cherrypy.expose
     @cherrypy.tools.json_out()
     def index(self, **kwargs):
-        if 'name' in kwargs:
-            return(istro.getServerInfo(kwargs['name']))
-        else:
-            return istro.getServers(**kwargs)
+        return istro.getServers(**kwargs)
 
-@cherrypy.popargs('matchId')
+@cherrypy.popargs('id')
 class MatchCtl:
     @cherrypy.expose
     @cherrypy.tools.json_out()
     def index(self, **kwargs):
-        if 'matchId' in kwargs:
-            try:
-                return(istro.getMatchInfo(int(kwargs['matchId'])))
-            except ValueError:
-                return None
-        else:
-            return istro.getMatches(**kwargs)
+        return istro.getMatches(**kwargs)
+
+@cherrypy.popargs('name')
+class FactionCtl:
+    @cherrypy.expose
+    @cherrypy.tools.json_out()
+    def index(self, **kwargs):
+            return istro.getFactions(**kwargs)
 
 class APICtl:
     def __init__(self):
         self.player = PlayerCtl()
         self.server = ServerCtl()
         self.match = MatchCtl()
+        self.faction = FactionCtl()
 
 class RootCtl:
     def __init__(self):

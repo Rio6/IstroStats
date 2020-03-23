@@ -17,7 +17,7 @@ function formatTime(time) {
 }
 
 var poll = null;
-function pollTimeout(fn, time=10000) {
+function pollTimeout(fn, time=15000) {
     if(poll) clearTimeout(poll);
     poll = setTimeout(() => {
         if(document.visibilityState === 'visible') {

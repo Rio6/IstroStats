@@ -1,16 +1,16 @@
 var name = null;
-var server = null;
+var faction = null;
 
 function reload() {
     pollTimeout(reload);
 
     $.ajax({
-        url: '/api/server/',
+        url: '/api/faction/',
         data: {
             name: name
         },
         success: data => {
-            server = data.servers[0];
+            faction = data.factions[0];
             refresh();
         }
     });
@@ -19,27 +19,23 @@ function reload() {
 function refresh() {
     $('#name').text(name);
 
-    if(!server) return;
-    $('#name').text(server.name);
-    $('#type').text(server.type);
-    $('#state').text(server.state);
-    $('#observers').text(server.observers);
-    $('#run-time').text(elapsed(server.runningSince) || "Not running");
+    if(!faction) return;
+    $('#rank').text(faction.rank);
+    $('#player-count').text(faction.players.length);
+    $('#last-active').text(formatTime(faction.lastActive));
 
     $('#players > li').remove();
 
-    for(let player of server.players) {
+    for(let player of faction.players) {
         $('#players').append(`
             <li class="list-group-item">
                 <div class="text-right float-left pr-1 w-50">
-                    ${!player.ai ? `
-                        <a href="/player.html?name=${player.name}">
-                            ${player.name}
-                        </a>
-                    ` : player.name}
+                    <a href="/player.html?name=${player.name}">
+                        ${player.name}
+                    </a>
                 </div>
                 <div class="text-left float-right pl-1 w-50">
-                    ${player.side}
+                    ${elapsed(player.logonTime) || formatTime(player.lastActive)}
                 </div>
             </li>
         `);
@@ -53,7 +49,9 @@ $(document).ready(() => {
         name = param.get('name')
         $(document).attr('title', name);
         reload();
+        refresh();
     }
 });
 
 setInterval(refresh, 1000);
+

@@ -68,11 +68,14 @@ class IstrolidWorker:
             else:
                 player = self._getPlayer(name, updateOnline=True, create=True)
 
-                player.mode = playerInfo.get('mode', player.mode)
-                player.rank = playerInfo.get('rank', player.rank)
-                player.faction = playerInfo.get('faction', player.faction)
+                if 'mode' in playerInfo:
+                    player.mode = playerInfo['mode']
+                    player.lastActive = datetime.utcnow()
                 if 'color' in playerInfo:
                     player.color = str.format('#{:02x}{:02x}{:02x}{:02x}', *playerInfo['color'])
+
+                player.rank = playerInfo.get('rank', player.rank)
+                player.faction = playerInfo.get('faction', player.faction)
 
             models.session.commit()
 

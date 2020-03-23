@@ -5,8 +5,8 @@
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
         <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
         <script src="/js/utils.js"></script>
-        <script src="/js/server.js"></script>
-        <title>Server</title>
+        <script src="/js/faction.js"></script>
+        <title>Faction</title>
     </head>
     <body>
         <div class="container">
@@ -20,22 +20,19 @@
 
             <div class="row">
                 <div class="col">
-                    <h3 class="text-center mt-4">Server Info</h3>
+                    <h3 class="text-center mt-4">Faction Info</h3>
                     <ul class="list-group">
                         <li class="list-group-item">
                             <span id="name" class="align-middle display-4"></span>
                         </li>
                         <li class="list-group-item">
-                            Mode: <span id="type"></span>
+                            Average Rank: <span id="rank"></span>
                         </li>
                         <li class="list-group-item">
-                            State: <span id="state"></span>
+                            Players: <span id="player-count"></span>
                         </li>
                         <li class="list-group-item">
-                            Players: <span id="observers"></span>
-                        </li>
-                        <li class="list-group-item">
-                            Running For: <span id="run-time"></span>
+                            Last Active: <span id="last-active"></span>
                         </li>
                     </ul>
                 </div>

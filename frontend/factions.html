@@ -7,49 +7,30 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
         <script src="/js/utils.js"></script>
-        <script src="/js/matches.js"></script>
-        <title>Matches</title>
+        <script src="/js/factions.js"></script>
+        <title>Factions</title>
     </head>
     <body>
         <div class="container">
             <nav class="nav border">
                 <a class="nav-link" href="/index.html">Home</a>
                 <a class="nav-link" href="/players.html">Players</a>
-                <a class="nav-link" href="/factions.html">Factions</a>
+                <a class="nav-link active" >Factions</a>
                 <a class="nav-link" href="/servers.html">Servers</a>
-                <a class="nav-link active">Matches</a>
+                <a class="nav-link" href="/matches.html">Matches</a>
             </nav>
 
-            <h1 class="text-center">Matches</h1>
+            <h1 class="text-center">Factions</h1>
 
-            <div>
-                <button class="btn btn-secondary" onclick="filter('server')">
-                    filter server
-                </button>
-                <button class="btn btn-secondary" onclick="filter('player')">
-                    filter player
-                </button>
-                <button class="btn btn-secondary" onclick="filter('type')">
-                    filter type
-                </button>
-                <input type="text" id="filter-text" />
-            </div>
-
-            <div id="filters"></div>
-
-            <table id="matches" class="table mt-2">
+            <table id="factions" class="table">
                 <thead><tr>
-                    <th onclick="sortBy('finished')">Finished</th>
-                    <th>Server</th>
-                    <th>Mode</th>
-                    <th>Winner</th>
-                    <th onclick="sortBy('time')">Time</th>
-                    <th>Players</th>
+                    <th onclick="sortBy('name')">Name</th>
+                    <th onclick="sortBy('playercount')">Players</th>
+                    <th onclick="sortBy('rank')">Average Rank</th>
+                    <th onclick="sortBy('active')">Active</th>
                 </tr></thead>
             </table>
 
             <ul id="page-button" class="pagination"></ul>
     </body>
 </html>
-
-

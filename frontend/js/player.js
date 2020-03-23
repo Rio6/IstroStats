@@ -45,7 +45,7 @@ function reload() {
             name: name
         },
         success: data => {
-            player = data;
+            player = data.players[0];
         }
     });
 
@@ -84,6 +84,7 @@ function refresh() {
         '3v3': {wins: 0, games: 0}
     };
 
+    if(!matches) return;
     for(let match of matches) {
 
         let player = match.players.find(p => p.name == name);

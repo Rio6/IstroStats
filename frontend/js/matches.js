@@ -100,7 +100,11 @@ function refresh() {
                 <td>${match.type}</td>
                 <td>${match.winningSide || "none"}</td>
                 <td>${formatSeconds(match.time)}</td>
-                <td>${match.players.map(({name}) => `<a href="/player.html?name=${name}">${name}</a>`)}</td>
+                <td>${
+                    match.players
+                        .sort((a, b) => b.winner - a.winner)
+                        .map(({name}) => `<a href="/player.html?name=${name}">${name}</a>`)
+                }</td>
             </tr>
         `);
     }

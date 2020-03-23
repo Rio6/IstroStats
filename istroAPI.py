@@ -1,3 +1,4 @@
+from sqlalchemy.sql.expression import func
 import models
 from models import PlayerModel, MatchModel, MatchPlayerModel, ServerModel, ServerPlayerModel
 
@@ -19,84 +20,11 @@ def _multiple(x):
 
 class IstrolidAPI:
 
-    def getPlayerInfo(self, name):
-        player = models.session.query(PlayerModel).filter_by(name=name, ai=False).one_or_none()
-        if player is None: return None
-        return self._playerToInfo(player)
-
-    def _playerToInfo(self, player):
-        servers = [rst[0] for rst in (models.session.query(ServerModel.name)
-            .join(ServerPlayerModel).filter(ServerPlayerModel.playerId == player.id))]
-
-        return {
-            'id': player.id,
-            'name': player.name,
-            'rank': player.rank,
-            'faction': player.faction,
-            'color': player.color,
-            'mode': player.mode,
-            'servers': servers,
-            'ai': player.ai,
-            'logonTime': player.logonTime,
-            'lastActive': player.lastActive,
-        }
-
-    def getServerInfo(self, name):
-        server = models.session.query(ServerModel).filter_by(name=name).one_or_none()
-        if server is None: return None
-        return self._serverToInfo(server)
-
-    def _serverToInfo(self, server):
-
-        players = []
-        for player, serverPlayer in (models.session.query(PlayerModel, ServerPlayerModel)
-                .join(PlayerModel).filter(ServerPlayerModel.serverId == server.id)):
-            players.append({
-                'name': player.name,
-                'ai': player.ai,
-                'side': serverPlayer.side
-            })
-
-        return {
-            'name': server.name,
-            'players': players,
-            'observers': server.observers,
-            'type': server.type,
-            'state': server.state,
-            'hidden': server.hidden,
-            'runningSince': server.runningSince
-        }
-
-    def getMatchInfo(self, matchId):
-        match = models.session.query(MatchModel).filter_by(id=matchId).one_or_none()
-        if match is None: return None
-        return self._matchToInfo(match)
-
-    def _matchToInfo(self, match):
-
-        players = []
-        for player, matchPlayer in (models.session.query(PlayerModel, MatchPlayerModel)
-                .join(PlayerModel).filter(MatchPlayerModel.matchId == match.id)):
-            players.append({
-                'name': player.name,
-                'ai': player.ai,
-                'winner': matchPlayer.winner,
-                'side': matchPlayer.side,
-            })
-
-
-        return {
-            'id': match.id,
-            'server': match.server,
-            'finished': match.finished,
-            'type': match.type,
-            'winningSide': match.winningSide if match.winningSide != '0' else None,
-            'time': match.time,
-            'players': players
-        }
-
     def getPlayers(self, **query):
         rst = models.session.query(PlayerModel)
+
+        if 'name' in query:
+            rst = rst.filter_by(name=_single(query['name']))
 
         if 'online' in query:
             if _bool(_single(query['online'])):
@@ -109,6 +37,10 @@ class IstrolidAPI:
 
         if 'search' in query:
             rst = rst.filter(PlayerModel.name.ilike(_single(query['search'])))
+
+        if 'faction' in query:
+            factions = _multiple(query['faction'])
+            rst = rst.filter(PlayerModel.faction.in_(factions))
 
         if 'order' in query:
             order = _single(query['order'])
@@ -138,6 +70,9 @@ class IstrolidAPI:
     def getServers(self, **query):
         rst = models.session.query(ServerModel)
 
+        if 'name' in query:
+            rst = rst.filter_by(name=_single(query['name']))
+
         if 'running' in query:
             if _bool(_single(query['running'])):
                 rst = rst.filter(ServerModel.runningSince != None)
@@ -152,19 +87,19 @@ class IstrolidAPI:
             rst = (rst.join(ServerPlayerModel).join(PlayerModel)
                     .filter(PlayerModel.name.in_(players)))
 
-        if 'order' in query:
-            order = _single(query['order'])
-            if order == 'running_des':
-                rst = rst.order_by(ServerModel.runningSince.desc().nullsfirst())
-            elif order == 'running_asc':
-                rst = rst.order_by(ServerModel.runningSince.asc().nullslast())
-
         return {
             'servers': [self._serverToInfo(r) for r in rst]
         }
 
     def getMatches(self, **query):
         rst = models.session.query(MatchModel)
+
+        if 'id' in query:
+            try:
+                rst = rst.filter_by(id=int(_single(query['id'])))
+            except ValueError as e:
+                print(e)
+                rst = rst.where(False)
 
         if 'player' in query:
             players = _multiple(query['player'])
@@ -208,4 +143,113 @@ class IstrolidAPI:
         return {
             'count': count,
             'matches': [self._matchToInfo(r) for r in rst]
+        }
+
+    def getFactions(self, **query):
+        rst = (models.session.query(PlayerModel)
+                .with_entities(PlayerModel.faction, func.avg(PlayerModel.rank), func.max(PlayerModel.lastActive))
+                .filter(PlayerModel.faction != None, PlayerModel.faction != '')
+                .group_by(PlayerModel.faction))
+
+        if 'name' in query:
+            rst = rst.filter_by(faction=query['name'])
+
+        if 'order' in query:
+            order = _single(query['order'])
+            if order == 'playercount_des':
+                rst = rst.order_by(func.count(PlayerModel.faction).desc())
+            elif order == 'playercount_asc':
+                rst = rst.order_by(func.count(PlayerModel.faction).asc())
+            elif order == 'name_des':
+                rst = rst.order_by(PlayerModel.faction.desc())
+            elif order == 'name_asc':
+                rst = rst.order_by(PlayerModel.faction.asc())
+            elif order == 'rank_des':
+                rst = rst.order_by(func.avg(PlayerModel.rank).desc())
+            elif order == 'rank_asc':
+                rst = rst.order_by(func.avg(PlayerModel.rank).asc())
+            elif order == 'active_des':
+                rst = rst.order_by(func.max(PlayerModel.lastActive).desc().nullslast())
+            elif order == 'active_asc':
+                rst = rst.order_by(func.max(PlayerModel.lastActive).asc().nullslast())
+
+        count = rst.count()
+
+        rst = rst.offset(_single(query.get('offset', 0)))
+        rst = rst.limit(_single(query.get('limit', 50)))
+
+        return {
+            'count': count,
+            'factions': [self._factionToInfo(*r) for r in rst]
+        }
+
+    def _playerToInfo(self, player):
+        servers = [rst[0] for rst in (models.session.query(ServerModel.name)
+            .join(ServerPlayerModel).filter(ServerPlayerModel.playerId == player.id))]
+
+        return {
+            'id': player.id,
+            'name': player.name,
+            'rank': player.rank,
+            'faction': player.faction,
+            'color': player.color,
+            'mode': player.mode,
+            'servers': servers,
+            'ai': player.ai,
+            'logonTime': player.logonTime,
+            'lastActive': player.lastActive,
+        }
+
+    def _serverToInfo(self, server):
+
+        players = []
+        for player, serverPlayer in (models.session.query(PlayerModel, ServerPlayerModel)
+                .join(PlayerModel).filter(ServerPlayerModel.serverId == server.id)):
+            players.append({
+                'name': player.name,
+                'ai': player.ai,
+                'side': serverPlayer.side
+            })
+
+        return {
+            'name': server.name,
+            'players': players,
+            'observers': server.observers,
+            'type': server.type,
+            'state': server.state,
+            'hidden': server.hidden,
+            'runningSince': server.runningSince
+        }
+
+    def _matchToInfo(self, match):
+
+        players = []
+        for player, matchPlayer in (models.session.query(PlayerModel, MatchPlayerModel)
+                .join(PlayerModel).filter(MatchPlayerModel.matchId == match.id)):
+            players.append({
+                'name': player.name,
+                'ai': player.ai,
+                'winner': matchPlayer.winner,
+                'side': matchPlayer.side,
+            })
+
+
+        return {
+            'id': match.id,
+            'server': match.server,
+            'finished': match.finished,
+            'type': match.type,
+            'winningSide': match.winningSide if match.winningSide != '0' else None,
+            'time': match.time,
+            'players': players
+        }
+
+    def _factionToInfo(self, name, rank, active):
+        players = models.session.query(PlayerModel).filter_by(faction=name)
+
+        return {
+            'name': name,
+            'rank': rank,
+            'lastActive': active,
+            'players': [self._playerToInfo(p) for p in players]
         }
