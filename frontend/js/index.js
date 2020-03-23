@@ -17,7 +17,7 @@ function reload() {
     $.ajax({
         url: '/api/server/',
         success: ({servers}) => {
-            datas.servers = servers.sort((a, b) => (b.runningSince || Infinity) - (a.runningSince || Infinity));
+            datas.servers = servers;
         }
     });
 
@@ -49,6 +49,7 @@ function refresh() {
 
     if(datas.servers) {
         $('#servers > li').remove();
+        datas.servers.sort((a, b) => (b.runningSince || Infinity) - (a.runningSince || Infinity));$('#servers > li').remove();
         for(let server of datas.servers) {
             if(server.hidden) continue;
             $('#servers').append(`
