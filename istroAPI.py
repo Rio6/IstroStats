@@ -1,3 +1,4 @@
+import datetime
 from sqlalchemy.sql.expression import func
 import models
 from models import PlayerModel, MatchModel, MatchPlayerModel, ServerModel, ServerPlayerModel
@@ -19,6 +20,39 @@ def _multiple(x):
         return [x]
 
 class IstrolidAPI:
+
+    def report(self, **time):
+
+        try:
+            time = datetime.timedelta(
+                minutes = float(time.get('minutes', 0)),
+                hours   = float(time.get('hours', 0)),
+                days    = float(time.get('days', 0)),
+                weeks   = float(time.get('weeks', 0)))
+
+            if time.total_seconds() <= 0:
+                time = datetime.timedelta(days=1)
+
+        except ValueError:
+            time = datetime.timedelta(days=1)
+
+        lastday = datetime.datetime.utcnow() - time
+
+        playerCount = models.session.query(PlayerModel).filter(PlayerModel.lastActive > lastday).count()
+        gameCount = {
+            'total': 0,
+            'types': {}
+        }
+
+        games = models.session.query(MatchModel).filter(MatchModel.finished > lastday)
+        for game in games:
+            gameCount['total'] += 1
+            gameCount['types'][game.type] = gameCount['types'].get(game.type, 0) + 1
+
+        return {
+            'players': playerCount,
+            'games': gameCount
+        }
 
     def getPlayers(self, **query):
         rst = models.session.query(PlayerModel)

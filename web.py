@@ -15,6 +15,8 @@ class DatetimeJSONEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, datetime.datetime):
             return obj.replace(tzinfo=datetime.timezone.utc).timestamp()
+        elif isinstance(obj, Decimal):
+            return str(obj)
         return super().default(obj)
     def iterencode(self, value):
         for chunk in super().iterencode(value):
@@ -25,40 +27,27 @@ def json_handler(*args, **kwargs):
     value = cherrypy.serving.request._json_inner_handler(*args, **kwargs)
     return json_encoder.iterencode(value)
 
-@cherrypy.popargs('name')
-class PlayerCtl:
+@cherrypy.tools.json_out()
+class APICtl:
     @cherrypy.expose
-    @cherrypy.tools.json_out()
-    def index(self, **kwargs):
+    def player(self, **kwargs):
         return istro.getPlayers(**kwargs)
 
-@cherrypy.popargs('name')
-class ServerCtl:
     @cherrypy.expose
-    @cherrypy.tools.json_out()
-    def index(self, **kwargs):
+    def server(self, **kwargs):
         return istro.getServers(**kwargs)
 
-@cherrypy.popargs('id')
-class MatchCtl:
     @cherrypy.expose
-    @cherrypy.tools.json_out()
-    def index(self, **kwargs):
+    def match(self, **kwargs):
         return istro.getMatches(**kwargs)
 
-@cherrypy.popargs('name')
-class FactionCtl:
     @cherrypy.expose
-    @cherrypy.tools.json_out()
-    def index(self, **kwargs):
-            return istro.getFactions(**kwargs)
+    def faction(self, **kwargs):
+        return istro.getFactions(**kwargs)
 
-class APICtl:
-    def __init__(self):
-        self.player = PlayerCtl()
-        self.server = ServerCtl()
-        self.match = MatchCtl()
-        self.faction = FactionCtl()
+    @cherrypy.expose
+    def report(self, **kwargs):
+        return istro.report(**kwargs)
 
 class RootCtl:
     def __init__(self):
@@ -66,18 +55,22 @@ class RootCtl:
 
 def main():
     # web server
-    cherrypy.quickstart(RootCtl(), '/', {
+    cherrypy.config.update({
         'global': {
             'server.socket_host': '0.0.0.0',
             'server.socket_port': int(os.environ.get('PORT', 8000)),
             'tools.json_out.handler': json_handler
-        },
+        }
+    })
+    cherrypy.tree.mount(RootCtl(), '/', config={
         '/': {
             'tools.staticdir.on': True,
             'tools.staticdir.dir': os.path.dirname(os.path.realpath(__file__)) + '/frontend',
             'tools.staticdir.index': 'index.html'
         }
     })
+    cherrypy.engine.start()
+    cherrypy.engine.block()
 
 if __name__ == '__main__':
     main()
