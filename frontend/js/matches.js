@@ -93,6 +93,10 @@ function refresh() {
     let {count, matches} = matchData;
 
     for(let match of matches) {
+        match.players.forEach(p => {
+            p.name = p.name.substring(0, 20);
+        });
+
         $('#matches').append(`
             <tr>
                 <td><a href="/match.html?id=${match.id}">${formatTime(match.finished)}</a></td>
@@ -103,7 +107,7 @@ function refresh() {
                 <td>${
                     match.players
                         .sort((a, b) => b.winner - a.winner)
-                        .map(({name}) => `<a href="/player.html?name=${name}">${name}</a>`)
+                        .map(p => p.ai ? p.name : `<a href="/player.html?name=${p.name}">${p.name}</a>`)
                 }</td>
             </tr>
         `);

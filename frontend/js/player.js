@@ -42,7 +42,8 @@ function reload() {
     $.ajax({
         url: '/api/player/',
         data: {
-            name: name
+            name: name,
+            ai: false
         },
         success: data => {
             player = data.players[0];

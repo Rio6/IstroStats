@@ -37,6 +37,10 @@ function refresh() {
     for(let server of servers) {
         if(server.hidden) continue;
 
+        server.players.forEach(p => {
+            p.name = p.name.substring(0, 20);
+        });
+
         let runTime = elapsed(server.runningSince);
         $('#servers').append(`
             <tr>
@@ -47,6 +51,12 @@ function refresh() {
                 <td>
                     ${runTime || "Not running"}
                 </td>
+                <td>${
+                    server.players
+                        .filter(p => !p.ai && (p.side === 'alpha' || p.side === 'beta'))
+                        .sort((a, b) => b.side - a.side)
+                        .map(p => p.ai ? p.name : `<a href="/player.html?name=${p.name}">${p.name}</a>`)
+                }</td>
             </tr>
         `);
     }

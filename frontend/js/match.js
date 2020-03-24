@@ -31,6 +31,7 @@ function refresh() {
 
     match.players.sort(compare('winner', true));
     for(let player of match.players) {
+        player.name = player.name.substring(0, 20);
         $('#players').append(`
             <li class="list-group-item">
                 <div class="text-right float-left pr-1 w-50">
