@@ -109,8 +109,8 @@ function refresh() {
         let matchPlayer = match.players.find(p => p.name == name);
         if(!matchPlayer) continue;
 
-        if(!player.hidden) {
-            if(match.winningSide && match.type in wins) {
+        if(match.winningSide && match.type in wins) {
+            if(!player.hidden) {
                 for(let type in wins) {
                     if(match.type === type) {
                         if(matchPlayer.winner)
@@ -121,8 +121,8 @@ function refresh() {
 
                 if(matchPlayer.winner)
                     total++;
-                games++;
             }
+            games++;
         }
 
         if(count <= 15) {
@@ -148,13 +148,13 @@ function refresh() {
     }
 
     $('#games').text(games);
-    if(games > 0)
+    if(!player.hidden && games > 0)
         $('#total-rate').text(`${total}/${games} (${Math.round(total/games*100)}%)`);
     else
         $('#total-rate').text("N/A");
 
     for(let type in wins) {
-        if(wins[type].games > 0) {
+        if(!player.hidden && wins[type].games > 0) {
             let wins2 = wins[type].wins, games = wins[type].games;
             $(`#${type}-rate`).text(`${wins2}/${games} (${Math.round(wins2/games*100)}%)`);
         } else {
