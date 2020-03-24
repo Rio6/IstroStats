@@ -1,30 +1,16 @@
-import time
 import json
-import os
+import time
 import logging
 
 import websocket
 from pymitter import EventEmitter
 
-email = None
-token = None
-
-# load account token
-email = os.environ.get('EMAIL', None)
-token = os.environ.get('TOKEN', None)
-
-if email is None or token is None:
-    with open('token.json') as file:
-        data = json.load(file)
-        if email is None:
-            email = data['email']
-        if token is None:
-            token = data['token']
-
 class IstroListener(EventEmitter):
-    def __init__(self, login=False, root_address="ws://198.199.109.223:88"):
+    def __init__(self, email, token, login=False, root_address="ws://198.199.109.223:88"):
         super().__init__()
         self.root_address = root_address
+        self.email = email
+        self.token = token
         self.login = login
         self.stopped = True
         self.reconnecting = False
@@ -80,7 +66,7 @@ class IstroListener(EventEmitter):
         logging.info("IstroListener connected")
         ws.send('["registerBot"]')
         if self.login:
-            ws.send(f'["authSignIn",{{"email":"{email}","token":"{token}"}}]')
+            ws.send(f'["authSignIn",{{"email":"{self.email}","token":"{self.token}"}}]')
 
     def _onMessage(self, ws, msg):
         data = json.loads(msg);
