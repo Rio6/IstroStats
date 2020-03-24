@@ -50,17 +50,30 @@ function reload() {
         }
     });
 
-    $.ajax({
-        url: '/api/match/',
-        data: {
-            player: name,
-            order: 'finished_des',
-            limit: 100
-        },
-        success: data => {
-            matches = data.matches;
+    let sendMatchRequest = (offset=0) => {
+        $.ajax({
+            url: '/api/match/',
+            data: {
+                player: name,
+                order: 'finished_des',
+                limit: 100
+            },
+            success: nextMatchData
+        });
+    }
+
+    let newMatches = [];
+    let nextMatchData = data => {
+        newMatches.splice(-1, 0, ...data.matches);
+
+        if(newMatches.length < data.count) {
+            sendMatchRequest(newMatches.length);
+        } else {
+            matches = newMatches;
         }
-    });
+    };
+
+    sendMatchRequest();
 }
 
 function refresh() {
@@ -81,7 +94,7 @@ function refresh() {
 
     $('#matches > li').remove();
 
-    let total = 0, games = 0;
+    let total = 0, games = 0, count = 0;
     let wins = {
         '1v1': {wins: 0, games: 0},
         '1v1r': {wins: 0, games: 0},
@@ -110,7 +123,7 @@ function refresh() {
             games++;
         }
 
-        if(total < 20) {
+        if(count <= 15) {
             $('#matches').append(`
                 <li class="list-group-item">
                     <div class="text-right float-left pr-1 w-50">
@@ -128,6 +141,8 @@ function refresh() {
                 </li>
             `);
         }
+
+        count++;
     }
 
     $('#games').text(games);
