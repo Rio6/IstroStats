@@ -29,8 +29,6 @@ class ServerPlayerModel(DeclarativeBase):
     playerId = Column(Integer, ForeignKey('players.id'), nullable=False)
     side = Column(String)
 
-    UniqueConstraint(serverId, playerId)
-
 class MatchPlayerModel(DeclarativeBase):
     __tablename__ = 'match_players'
 
