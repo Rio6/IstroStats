@@ -247,6 +247,7 @@ class IstrolidAPI:
             'mode': player.mode,
             'servers': servers,
             'ai': player.ai,
+            'hidden': player.hidden,
             'logonTime': player.logonTime,
             'lastActive': player.lastActive,
         }

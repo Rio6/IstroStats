@@ -17,9 +17,10 @@ class PlayerModel(DeclarativeBase):
     rank = Column(Integer, default=0)
     faction = Column(String, default='')
     color = Column(String, default='#000000ff')
-    ai = Column(Boolean, default=False)
-    lastActive = Column(DateTime)
     mode = Column(String)
+    ai = Column(Boolean, default=False)
+    hidden = Column(Boolean, default=False)
+    lastActive = Column(DateTime)
     logonTime = Column(DateTime)
 
 class ServerPlayerModel(DeclarativeBase):

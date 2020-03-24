@@ -106,21 +106,23 @@ function refresh() {
     if(!matches) return;
     for(let match of matches) {
 
-        let player = match.players.find(p => p.name == name);
-        if(!player) continue;
+        let matchPlayer = match.players.find(p => p.name == name);
+        if(!matchPlayer) continue;
 
-        if(match.winningSide && match.type in wins) {
-            for(let type in wins) {
-                if(match.type === type) {
-                    if(player.winner)
-                        wins[type].wins++;
-                    wins[type].games++;
+        if(!player.hidden) {
+            if(match.winningSide && match.type in wins) {
+                for(let type in wins) {
+                    if(match.type === type) {
+                        if(matchPlayer.winner)
+                            wins[type].wins++;
+                        wins[type].games++;
+                    }
                 }
-            }
 
-            if(player.winner)
-                total++;
-            games++;
+                if(matchPlayer.winner)
+                    total++;
+                games++;
+            }
         }
 
         if(count <= 15) {
@@ -136,7 +138,7 @@ function refresh() {
                         <a href="/server.html?name=${match.server}">
                             ${match.server}
                         </a>
-                        ${match.winningSide ? player.winner ? "won" : "lost" : "draw"}
+                        ${match.winningSide ? matchPlayer.winner ? "won" : "lost" : "draw"}
                     </div>
                 </li>
             `);
