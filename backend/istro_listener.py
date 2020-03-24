@@ -14,7 +14,7 @@ email = os.environ.get('EMAIL', None)
 token = os.environ.get('TOKEN', None)
 
 if email is None or token is None:
-    with open(os.path.dirname(os.path.realpath(__file__)) + '/token.json') as file:
+    with open('token.json') as file:
         data = json.load(file)
         if email is None:
             email = data['email']

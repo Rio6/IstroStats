@@ -1,7 +1,7 @@
 import datetime
 from sqlalchemy.sql.expression import func
-import models
-from models import PlayerModel, MatchModel, MatchPlayerModel, ServerModel, ServerPlayerModel
+from . import models
+from .models import PlayerModel, MatchModel, MatchPlayerModel, ServerModel, ServerPlayerModel
 
 # helper functions to ensure we get the right data type from http params
 def _bool(string):

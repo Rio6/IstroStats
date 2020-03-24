@@ -1,8 +1,11 @@
+import os
 import logging
 import signal
+from sqlalchemy import create_engine
 
-import models
-from istroWorker import IstrolidWorker
+from backend import IstrolidWorker, models
+
+DATABASE_URL = 'sqlite:///database.db?check_same_thread=False'
 
 istro = IstrolidWorker()
 
@@ -15,6 +18,9 @@ def main():
 
     signal.signal(signal.SIGINT, stop)
     signal.signal(signal.SIGTERM, stop)
+
+    engine = create_engine(os.environ.get('DATABASE_URL', DATABASE_URL))
+    models.init_models(engine)
 
     logging.info("Starting worker")
     istro.start()

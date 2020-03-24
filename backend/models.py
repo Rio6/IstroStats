@@ -6,24 +6,20 @@ from sqlalchemy.orm import scoped_session, sessionmaker, relationship
 from sqlalchemy.schema import UniqueConstraint
 from sqlalchemy.ext.declarative import declarative_base
 
-DATABASE_URL = 'sqlite:///database.db?check_same_thread=False'
-
 DeclarativeBase = declarative_base()
-
-engine = create_engine(os.environ.get('DATABASE_URL', DATABASE_URL))
-session = scoped_session(sessionmaker(bind=engine, autoflush=True, autocommit=False))
+session = None
 
 class PlayerModel(DeclarativeBase):
     __tablename__ = 'players'
 
     id = Column(Integer, primary_key=True)
-    name = Column(String(18), index=True, nullable=False)
+    name = Column(String, index=True, nullable=False)
     rank = Column(Integer, default=0)
-    faction = Column(String(8), default='')
-    color = Column(String(9), default='#000000ff')
+    faction = Column(String, default='')
+    color = Column(String, default='#000000ff')
     ai = Column(Boolean, default=False)
     lastActive = Column(DateTime)
-    mode = Column(String(18))
+    mode = Column(String)
     logonTime = Column(DateTime)
 
 class ServerPlayerModel(DeclarativeBase):
@@ -31,7 +27,7 @@ class ServerPlayerModel(DeclarativeBase):
     id = Column(Integer, primary_key=True)
     serverId = Column(Integer, ForeignKey('servers.id'), nullable=False)
     playerId = Column(Integer, ForeignKey('players.id'), nullable=False)
-    side = Column(String(18))
+    side = Column(String)
 
     UniqueConstraint(serverId, playerId)
 
@@ -42,18 +38,16 @@ class MatchPlayerModel(DeclarativeBase):
     matchId = Column(Integer, ForeignKey('matches.id'), index=True, nullable=False)
     playerId = Column(Integer, ForeignKey('players.id'), index=True, nullable=False)
     winner = Column(Boolean)
-    side = Column(String(16))
-
-    UniqueConstraint(matchId, playerId)
+    side = Column(String)
 
 class ServerModel(DeclarativeBase):
     __tablename__ = 'servers'
 
     id = Column(Integer, primary_key=True)
-    name = Column(String(32), nullable=False, unique=True)
+    name = Column(String, nullable=False, unique=True)
     observers = Column(Integer, default=0)
-    type = Column(String(16))
-    state = Column(String(16))
+    type = Column(String)
+    state = Column(String)
     hidden = Column(Boolean)
     runningSince = Column(DateTime)
 
@@ -63,10 +57,10 @@ class MatchModel(DeclarativeBase):
     __tablename__ = 'matches'
 
     id = Column(Integer, primary_key=True)
-    server = Column(String(32), nullable=False)
+    server = Column(String, nullable=False)
     finished = Column(DateTime, nullable=False, default=datetime.utcnow, index=True)
-    type = Column(String(16))
-    winningSide = Column(String(18))
+    type = Column(String)
+    winningSide = Column(String)
     time = Column(Float)
 
     players = relationship(MatchPlayerModel)
@@ -82,4 +76,7 @@ def get_or_create(model, **kwargs):
         session.flush()
         return instance
 
-DeclarativeBase.metadata.create_all(engine)
+def init_models(engine):
+    global session
+    DeclarativeBase.metadata.create_all(engine)
+    session = scoped_session(sessionmaker(bind=engine, autoflush=True, autocommit=False))

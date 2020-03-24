@@ -4,11 +4,13 @@ import os
 import datetime
 import json
 from decimal import Decimal
+
 import cherrypy
+from sqlalchemy import create_engine
 
-from istroAPI import IstrolidAPI
+from backend import IstrolidAPI, models
 
-istro = IstrolidAPI()
+DATABASE_URL = 'sqlite:///database.db?check_same_thread=False'
 
 # JSON encoder that can serialize datetime
 class DatetimeJSONEncoder(json.JSONEncoder):
@@ -29,31 +31,37 @@ def json_handler(*args, **kwargs):
 
 @cherrypy.tools.json_out()
 class APICtl:
+    def __init__(self):
+        self.istro = IstrolidAPI()
+
     @cherrypy.expose
     def player(self, **kwargs):
-        return istro.getPlayers(**kwargs)
+        return self.istro.getPlayers(**kwargs)
 
     @cherrypy.expose
     def server(self, **kwargs):
-        return istro.getServers(**kwargs)
+        return self.istro.getServers(**kwargs)
 
     @cherrypy.expose
     def match(self, **kwargs):
-        return istro.getMatches(**kwargs)
+        return self.istro.getMatches(**kwargs)
 
     @cherrypy.expose
     def faction(self, **kwargs):
-        return istro.getFactions(**kwargs)
+        return self.istro.getFactions(**kwargs)
 
     @cherrypy.expose
     def report(self, **kwargs):
-        return istro.report(**kwargs)
+        return self.istro.report(**kwargs)
 
 class RootCtl:
     def __init__(self):
         self.api = APICtl()
 
 def main():
+    engine = create_engine(os.environ.get('DATABASE_URL', DATABASE_URL))
+    models.init_models(engine)
+
     # web server
     cherrypy.config.update({
         'global': {

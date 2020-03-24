@@ -1,9 +1,9 @@
 import logging
 from datetime import datetime
 
-import models
-from models import PlayerModel, MatchModel, MatchPlayerModel, ServerModel, ServerPlayerModel
-from istro_listener import IstroListener
+from . import models
+from .models import PlayerModel, MatchModel, MatchPlayerModel, ServerModel, ServerPlayerModel
+from .istro_listener import IstroListener
 
 ISTRO_NAME = "IstroStats"
 
@@ -129,10 +129,10 @@ class IstrolidWorker:
 
             for player in report['players']:
                 playerId = self._getPlayer(player['name'], player['ai'], create=True).id
-                matchPlayer = models.get_or_create(MatchPlayerModel, matchId=match.id, playerId=playerId)
-                matchPlayer.winner = (player['side'] == report['winningSide'])
-                matchPlayer.side = player['side']
-                match.players.append(matchPlayer)
+                match.players.append(MatchPlayerModel(
+                    playerId = playerId,
+                    winner = (player['side'] == report['winningSide']),
+                    side = player['side']))
 
             models.session.commit()
 
