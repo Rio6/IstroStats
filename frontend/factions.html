@@ -29,6 +29,10 @@
                     search
                 </button>
                 <input type="text" id="search-text" onkeyup="if(event.keyCode === 13) updateConfig();" />
+                <span class="form-check ml-2">
+                    <input id="multi-box" type="checkbox" checked class="form-check-input" onclick="updateConfig()" />
+                    <label for="online-box">More than 1 player</label>
+                </span>
             </div>
 
             <table class="table">

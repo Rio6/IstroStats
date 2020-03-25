@@ -1,6 +1,7 @@
 var config = {
     order: 'playercount',
     orderDes: true,
+    moreThanOne: true,
     seatch: null,
     page: 0,
     rows: 20,
@@ -9,6 +10,8 @@ var config = {
 var factionData = null;
 
 function updateConfig() {
+    config.moreThanOne = $('#multi-box').is(':checked');
+
     let val = $('#search-text').val();
     if(val)
         config.search = `%${val.replace(/%/g, '[%]')}%`;
@@ -45,6 +48,7 @@ function reload() {
     };
 
     if(config.search) data.search = config.search;
+    if(config.moreThanOne) data.minplayers = 2;
 
     $.ajax({
         url: '/api/faction/',

@@ -1,4 +1,6 @@
 import datetime
+import logging
+
 from sqlalchemy.sql.expression import func
 from . import models
 from .models import PlayerModel, MatchModel, MatchPlayerModel, ServerModel, ServerPlayerModel
@@ -136,7 +138,7 @@ class IstrolidAPI:
             try:
                 rst = rst.filter_by(id=int(_single(query['id'])))
             except ValueError as e:
-                print(e)
+                logging.warn("IstroAPI: %s", e);
                 rst = rst.where(False)
 
         if 'player' in query:
@@ -198,6 +200,13 @@ class IstrolidAPI:
 
         if 'search' in query:
             rst = rst.filter(PlayerModel.faction.ilike(_single(query['search'])))
+
+        if 'minplayers' in query:
+            try:
+                rst = rst.having(func.count(PlayerModel.faction) >= int(query['minplayers']))
+            except ValueError as e:
+                logging.warn("IstroAPI: %s", e);
+                rst = rst.where(False)
 
         if 'order' in query:
             order = _single(query['order'])
