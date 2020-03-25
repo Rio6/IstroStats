@@ -37,7 +37,7 @@ function rankImage(rank) {
 };
 
 function reload() {
-    pollTimeout(reload);
+    //pollTimeout(reload);
 
     $.ajax({
         url: '/api/player/',
@@ -80,15 +80,21 @@ function refresh() {
     $('#name').text(name);
 
     if(!player) return;
-    $('#rank-img').css('background-color', player.color).attr('src', 'http://www.istrolid.com/img/ui/rank/' + rankImage(player.rank));
+
+    $('#rank-img').css('background-color', player.color).removeClass('invisible');
+    if(player.rank > 0)
+        $('#rank-img').attr('src', 'http://www.istrolid.com/img/ui/rank/' + rankImage(player.rank));
+
     $('#rank').text(player.rank);
+
     if(player.faction)
-        $('#faction').html(`<a href="/faction.html?name=${player.faction}">${player.faction}</a>`);
+        $('#faction').html(`<a href="/faction?name=${player.faction}">${player.faction}</a>`);
     else
-        $('#faction').text('');
+        $('#faction').text("");
+
     $('#color').text(player.color);
-    $('#mode').text(player.mode);
-    $('#servers').html(player.servers.map(s => `<a href="/server.html?name=${s}">${s}</a>`));
+    $('#mode').text(player.mode || "");
+    $('#servers').html(player.servers.map(s => `<a href="/server?name=${s}">${s}</a>`));
     $('#online-time').text(elapsed(player.logonTime) || 'Offline');
     $('#last-active').text(formatTime(player.lastActive));
 
@@ -129,13 +135,13 @@ function refresh() {
             $('#matches').append(`
                 <li class="list-group-item">
                     <div class="text-right float-left pr-1 w-50">
-                        <a href="/match.html?id=${match.id}">
+                        <a href="/match?id=${match.id}">
                             ${formatTime(match.finished)}
                         </a>
                     </div>
                     <div class="text-left float-right pl-1 w-50">
                         ${match.type}
-                        <a href="/server.html?name=${match.server}">
+                        <a href="/server?name=${match.server}">
                             ${match.server}
                         </a>
                         ${match.winningSide ? matchPlayer.winner ? "won" : "lost" : "draw"}

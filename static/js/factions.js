@@ -71,7 +71,7 @@ function refresh() {
     for(let faction of factions) {
         $('#factions').append(`
             <tr>
-                <td><a href="/faction.html?name=${faction.name}">${faction.name}</a></td>
+                <td><a href="/faction?name=${faction.name}">${faction.name}</a></td>
                 <td>${faction.size}</td>
                 <td>${Math.round(faction.rank)}</td>
                 <td>${formatTime(faction.lastActive)}</td>

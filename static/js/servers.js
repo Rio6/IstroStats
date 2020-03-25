@@ -44,7 +44,7 @@ function refresh() {
         let runTime = elapsed(server.runningSince);
         $('#servers').append(`
             <tr>
-                <td><a href="/server.html?name=${server.name}">${server.name}</a></td>
+                <td><a href="/server?name=${server.name}">${server.name}</a></td>
                 <td>${server.type}</td>
                 <td>${server.state}</td>
                 <td>${server.observers}</td>
@@ -55,7 +55,7 @@ function refresh() {
                     server.players
                         .filter(p => !p.ai && (p.side === 'alpha' || p.side === 'beta'))
                         .sort((a, b) => b.side - a.side)
-                        .map(p => p.ai ? p.name : `<a href="/player.html?name=${p.name}">${p.name}</a>`)
+                        .map(p => p.ai ? p.name : `<a href="/player?name=${p.name}">${p.name}</a>`)
                 }</td>
             </tr>
         `);

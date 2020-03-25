@@ -1,29 +1,23 @@
 var config = {
-    order: 'finished',
+    order: 'rank',
     orderDes: true,
-    filters: {
-        server: [],
-        player: [],
-        type: []
-    },
+    onlineOnly: false,
+    search: null,
     page: 0,
     rows: 20,
 };
 
-var matchData = null;
+var playerData = null;
 
-function filter(field) {
-    let value = $('#filter-text').val();
-    if(value && !config.filters[field].includes(value)) {
-        config.filters[field].push(value);
-        config.page = 0;
-        reload();
-    }
-    $('#filter-text').val("");
-}
+function updateConfig() {
+    config.onlineOnly = $('#online-box').is(':checked');
 
-function removeFilter(field, id) {
-    config.filters[field].splice(id, 1);
+    let val = $('#search-text').val();
+    if(val)
+        config.search = `%${val.replace(/%/g, '[%]')}%`;
+    else
+        config.search = null;
+
     config.page = 0;
     reload();
 }
@@ -53,62 +47,38 @@ function reload() {
         offset: config.page * config.rows
     };
 
-    for(let f in config.filters) {
-        if(config.filters[f].length > 0) {
-            data[f] = config.filters[f];
-        }
-    }
-
     if(config.onlineOnly) data.online = true;
+    if(config.search) data.search = config.search;
 
     $.ajax({
-        url: '/api/match/',
-        data: $.param(data, true), // required to send array to cherrypy
-        success: (data) => {
-            matchData = data;
+        url: '/api/player/',
+        data: data,
+        success: data => {
+            playerData = data;
             refresh();
         }
     });
 }
 
 function refresh() {
-    if(!matchData) return;
+    if(!playerData) return;
 
-    // filter tags
-    $('#filters > div').remove();
-    for(let field in config.filters) {
-        let filters = config.filters[field]
-        for(let i in filters) {
-            $('#filters').append(`
-            <div class="btn btn-info" onclick="removeFilter('${field}', ${i})">
-                ${field}=${filters[i]}
-            </div>
-        `);
-        }
-    }
+    // players
+    $('#players > tr').remove();
 
-    // matches
-    $('#matches > tr').remove();
+    let {count, players} = playerData;
 
-    let {count, matches} = matchData;
-
-    for(let match of matches) {
-        match.players.forEach(p => {
-            p.name = p.name.substring(0, 20);
-        });
-
-        $('#matches').append(`
+    for(let player of players) {
+        $('#players').append(`
             <tr>
-                <td><a href="/match.html?id=${match.id}">${formatTime(match.finished)}</a></td>
-                <td><a href="/server.html?name=${match.server}">${match.server}</a></td>
-                <td>${match.type}</td>
-                <td>${match.winningSide || "none"}</td>
-                <td>${formatSeconds(match.time)}</td>
-                <td>${
-                    match.players
-                        .sort((a, b) => b.winner - a.winner)
-                        .map(p => p.ai ? p.name : `<a href="/player.html?name=${p.name}">${p.name}</a>`)
-                }</td>
+                <td><a href="/player?name=${player.name}">${player.name}</a></td>
+                <td>${player.faction ? `<a href="/faction?name=${player.faction}">${player.faction}</a>` : ''}</td>
+                <td>${player.rank}</td>
+                <td>${player.servers.map(s => `<a href="/server?name=${s}">${s}</a>`)}</td>
+                <td>${player.mode || ""}</td>
+                <td>
+                    ${elapsed(player.logonTime) || formatTime(player.lastActive)}
+                </td>
             </tr>
         `);
     }
@@ -151,4 +121,5 @@ function refresh() {
     `);
 }
 
-$(document).ready(reload);
+$(document).ready(updateConfig);
+setInterval(refresh, 1000);

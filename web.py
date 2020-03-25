@@ -6,11 +6,19 @@ import json
 from decimal import Decimal
 
 import cherrypy
+
+from mako.template import Template
+from mako.exceptions import TemplateLookupException
+from mako.lookup import TemplateLookup
+
 from sqlalchemy import create_engine
 
 from backend import IstrolidAPI, models
 
 DATABASE_URL = 'sqlite:///database.db?check_same_thread=False'
+
+root = os.path.abspath(os.path.dirname(__file__))
+lookup = TemplateLookup(directories=os.path.join(root, 'templates'))
 
 # JSON encoder that can serialize datetime
 class DatetimeJSONEncoder(json.JSONEncoder):
@@ -54,9 +62,17 @@ class APICtl:
     def report(self, **kwargs):
         return self.istro.report(**kwargs)
 
+@cherrypy.popargs('page')
 class RootCtl:
     def __init__(self):
         self.api = APICtl()
+
+    @cherrypy.expose
+    def index(self, page='index', **_):
+        try:
+            return lookup.get_template('base.mako').render(page=page)
+        except TemplateLookupException:
+            raise cherrypy.NotFound(page)
 
 def main():
     engine = create_engine(os.environ.get('DATABASE_URL', DATABASE_URL))
@@ -74,8 +90,7 @@ def main():
     cherrypy.tree.mount(RootCtl(), '/', config={
         '/': {
             'tools.staticdir.on': True,
-            'tools.staticdir.dir': os.path.dirname(os.path.realpath(__file__)) + '/frontend',
-            'tools.staticdir.index': 'index.html'
+            'tools.staticdir.dir': os.path.join(root, 'static'),
         }
     })
     cherrypy.engine.start()

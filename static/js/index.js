@@ -41,9 +41,9 @@ function refresh() {
         for(let player of players) {
             $('#players').append(`
                 <li class="list-group-item">
-                    <a href="/player.html?name=${player.name}">${player.name}</a>
-                    ${player.servers.length > 0 ? player.servers.map(s => `<a href="/server.html?name=${s}">${s}</a>`)
-                        : player.mode}
+                    <a href="/player?name=${player.name}">${player.name}</a>
+                    ${player.servers.length > 0 ? player.servers.map(s => `<a href="/server?name=${s}">${s}</a>`)
+                        : (player.mode || "")}
                 </li>
             `);
         }

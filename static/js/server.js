@@ -1,42 +1,41 @@
-var id = null;
-var match = null;
+var name = null;
+var server = null;
 
 function reload() {
     pollTimeout(reload);
 
     $.ajax({
-        url: '/api/match/',
+        url: '/api/server/',
         data: {
-            id: id
+            name: name
         },
         success: data => {
-            match = data.matches[0];
+            server = data.servers[0];
             refresh();
         }
     });
 }
 
 function refresh() {
-    if(!match) return;
+    $('#name').text(name);
 
-    $(document).attr('title', `${match.type} ${match.server}`);
-
-    $('#finished').text(formatTime(match.finished));
-    $('#server').html(`<a href="/server.html?name=${match.server}">${match.server}</a>`);
-    $('#type').text(match.type);
-    $('#winning-side').text(match.winningSide || "none");
-    $('#time').text(formatSeconds(match.time));
+    if(!server) return;
+    $('#name').text(server.name);
+    $('#type').text(server.type);
+    $('#state').text(server.state);
+    $('#observers').text(server.observers);
+    $('#run-time').text(elapsed(server.runningSince) || "Not running");
 
     $('#players > li').remove();
 
-    match.players.sort(compare('winner', true));
-    for(let player of match.players) {
+    server.players.sort(compare('side'));
+    for(let player of server.players) {
         player.name = player.name.substring(0, 20);
         $('#players').append(`
             <li class="list-group-item">
                 <div class="text-right float-left pr-1 w-50">
                     ${!player.ai ? `
-                        <a href="/player.html?name=${player.name}">
+                        <a href="/player?name=${player.name}">
                             ${player.name}
                         </a>
                     ` : player.name}
@@ -52,8 +51,9 @@ function refresh() {
 $(document).ready(() => {
     let param = new URLSearchParams(window.location.search);
 
-    if(param.has('id')) {
-        id = param.get('id')
+    if(param.has('name')) {
+        name = param.get('name')
+        $(document).attr('title', name);
         reload();
     }
 });

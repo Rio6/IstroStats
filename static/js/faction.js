@@ -60,7 +60,7 @@ function refresh() {
             $('#players').append(`
                 <li class="list-group-item">
                     <div class="text-right float-left pr-1 w-50">
-                        <a href="/player.html?name=${player.name}">
+                        <a href="/player?name=${player.name}">
                             ${player.name}
                         </a>
                     </div>
