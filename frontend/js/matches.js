@@ -123,7 +123,7 @@ function refresh() {
         </li>
     `);
 
-    let pages = Math.floor(count / config.rows);
+    let pages = Math.ceil(count / config.rows) - 1;
     for(let i = 0; i <= pages; i++) {
         if(i > 0 && i < pages && Math.abs(i-config.page) > 1) {
             pageBtn.append(`
