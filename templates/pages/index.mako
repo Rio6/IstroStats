@@ -5,7 +5,7 @@
     <h1>IstroStats</h1>
 
     <div class="row">
-        <div class="col list-group">
+        <div class="col">
             <h2>Last 24 Hours</h2>
             <ul id="reports" class="list-group">
                 ${createList("Active Players", "Total Games", "1v1", "1v1r", "1v1t", "2v2", "3v3", "survival", postfix="-report", default=0)}
