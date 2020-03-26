@@ -37,7 +37,7 @@ function rankImage(rank) {
 };
 
 function reload() {
-    //pollTimeout(reload);
+    pollTimeout(reload);
 
     $.ajax({
         url: '/api/player/',
