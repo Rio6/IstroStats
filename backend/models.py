@@ -62,7 +62,7 @@ class MatchModel(DeclarativeBase):
     winningSide = Column(String)
     time = Column(Float)
 
-    players = relationship(MatchPlayerModel)
+    players = relationship(MatchPlayerModel, cascade='all, delete-orphan')
 
 # https://stackoverflow.com/a/6078058/6023997
 def get_or_create(model, **kwargs):

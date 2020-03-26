@@ -24,7 +24,9 @@
             % for (title, path) in (("Home", "index"), ("Players", "players"), ("Factions", "factions"), ("Servers", "servers"), ("Matches", "matches")):
                 ${navitem(title, path)}
             % endfor
-            <a class="btn btn-primary btn-sm ml-auto mt-1 mr-1 h-75" target="_blank" href="https://www.patreon.com/user?u=32408791">Help to run the server</a>
+            <a class="btn btn-primary btn-sm ml-auto mt-1 mr-1 h-75" target="_blank" href="https://www.patreon.com/user?u=32408791">
+                Help to run the server
+            </a>
         </nav>
 
         <%include file="pages/${page}.mako" />

@@ -155,7 +155,7 @@ class IstrolidWorker:
             logging.error("Error adding new match: %s", e)
             models.session.rollback()
 
-    # updateOnline: add player to online lis
+    # updateOnline: add player to online list
     # create: create player in db if it doesn't exist
     def _getPlayer(self, name, ai=False, updateOnline=False, create=False):
         if create:
