@@ -56,7 +56,8 @@ function reload() {
             data: {
                 player: name,
                 order: 'finished_des',
-                limit: 100
+                limit: 100,
+                offset: offset
             },
             success: nextMatchData
         });
