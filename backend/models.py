@@ -26,16 +26,16 @@ class PlayerModel(DeclarativeBase):
 class ServerPlayerModel(DeclarativeBase):
     __tablename__ = 'server_players'
     id = Column(Integer, primary_key=True)
-    serverId = Column(Integer, ForeignKey('servers.id'), nullable=False)
-    playerId = Column(Integer, ForeignKey('players.id'), nullable=False)
+    serverId = Column(Integer, ForeignKey('servers.id', ondelete='CASCADE'), nullable=False)
+    playerId = Column(Integer, ForeignKey('players.id', ondelete='CASCADE'), nullable=False)
     side = Column(String)
 
 class MatchPlayerModel(DeclarativeBase):
     __tablename__ = 'match_players'
 
     id = Column(Integer, primary_key=True)
-    matchId = Column(Integer, ForeignKey('matches.id'), index=True, nullable=False)
-    playerId = Column(Integer, ForeignKey('players.id'), index=True, nullable=False)
+    matchId = Column(Integer, ForeignKey('matches.id', ondelete='CASCADE'), index=True, nullable=False)
+    playerId = Column(Integer, ForeignKey('players.id', ondelete='CASCADE'), index=True, nullable=False)
     winner = Column(Boolean)
     side = Column(String)
 
@@ -50,7 +50,7 @@ class ServerModel(DeclarativeBase):
     hidden = Column(Boolean)
     runningSince = Column(DateTime)
 
-    players = relationship(ServerPlayerModel, cascade='all, delete-orphan')
+    players = relationship(ServerPlayerModel, cascade='all,delete-orphan')
 
 class MatchModel(DeclarativeBase):
     __tablename__ = 'matches'
@@ -62,7 +62,7 @@ class MatchModel(DeclarativeBase):
     winningSide = Column(String)
     time = Column(Float)
 
-    players = relationship(MatchPlayerModel, cascade='all, delete-orphan')
+    players = relationship(MatchPlayerModel, cascade='all,delete-orphan')
 
 # https://stackoverflow.com/a/6078058/6023997
 def get_or_create(model, **kwargs):
