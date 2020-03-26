@@ -37,12 +37,20 @@
                     Help to run the server
                 </a>
 
-                <button class="btn btn-light dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <button class="btn dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     Themes
                 </button>
-                <div id="theme-list" class="dropdown-menu">
+                <div class="dropdown-menu">
                     <span class="dropdown-item" onclick="changeTheme(null)">
                         Default
+                    </span>
+
+                    <div id="theme-list"></div>
+
+                    <span class="dropdown-item text-muted disabled">
+                        <small>
+                            Themes from <a href="https://bootswatch.com/">Bootswatch</a>
+                        </small>
                     </span>
                 </div>
             </span>
@@ -50,8 +58,8 @@
 
         <%include file="pages/${page}.mako" />
 
-        <nav class="footer bg-transparent text-muted text-center">
+        <div class="footer bg-transparent text-muted text-center">
             Made by R26
-        </nav>
+        </div>
     </body>
 </html>
