@@ -39,3 +39,30 @@ function compare(field, reverse, nulls) {
         return rst;
     };
 }
+
+function addPageButton(currentPage, rowsPerPage, totalRows) {
+    let pages = Math.ceil(totalRows / rowsPerPage) - 1;
+
+    $('#page-button > li').remove()
+
+    let pageBtn = $('#page-button');
+    for(let i = 0; i <= pages; i++) {
+        if(i > 0 && i < pages && Math.abs(i-currentPage) > 1) {
+            pageBtn.append(`
+                <li class="page-item disabled">
+                    <a class="page-link">...</a>
+                </li>
+            `);
+            if(i < currentPage - 1)
+                i = currentPage - 2;
+            else if(i > currentPage + 1)
+                i = pages - 1;
+        } else {
+            pageBtn.append(`
+                <li class="page-item ${i === currentPage ? 'active' : ''}" onclick="setPage(${i})">
+                    <a href='#' class="page-link">${i}</a>
+                </li>
+            `);
+        }
+    }
+}

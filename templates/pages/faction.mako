@@ -1,3 +1,5 @@
+<%namespace file="utils/list.mako" import="createList" />
+
 <div class="container">
     <div class="row">
         <div class="col">
@@ -6,21 +8,13 @@
                 <li class="list-group-item">
                     <span id="name" class="align-middle display-4"></span>
                 </li>
-                <li class="list-group-item">
-                    <strong>Average Rank:</strong> <span id="rank"></strong></span>
-                </li>
-                <li class="list-group-item">
-                    <strong>Players:</strong> <span id="player-count"></strong></span>
-                </li>
-                <li class="list-group-item">
-                    <strong>Last Active:</strong> <span id="last-active"></strong></span>
-                </li>
+                ${createList("Average Rank", "Players", "Last Active", default=0)}
             </ul>
         </div>
 
         <div class="col">
             <h3 class="mt-4 text-center">Players</h3>
-            <ul id="players" class="list-group"></ul>
+            <ul id="player-list" class="list-group"></ul>
         </div>
     </div>
 </div>

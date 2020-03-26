@@ -43,11 +43,11 @@ function refresh() {
     $('#name').text(name);
 
     if(!faction) return;
-    $('#rank').text(Math.round(faction.rank));
-    $('#player-count').text(faction.players.length);
+    $('#average-rank').text(Math.round(faction.rank));
+    $('#players').text(faction.players.length);
     $('#last-active').text(formatTime(faction.lastActive));
 
-    $('#players > li').remove();
+    $('#player-list > li').remove();
 
     if(faction.players) {
         faction.players
@@ -57,7 +57,7 @@ function refresh() {
             });
 
         for(let player of faction.players) {
-            $('#players').append(`
+            $('#player-list').append(`
                 <li class="list-group-item">
                     <div class="text-right float-left pr-1 w-50">
                         <a href="/player?name=${player.name}">

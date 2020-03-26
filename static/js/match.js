@@ -23,8 +23,8 @@ function refresh() {
 
     $('#finished').text(formatTime(match.finished));
     $('#server').html(`<a href="/server?name=${match.server}">${match.server}</a>`);
-    $('#type').text(match.type);
-    $('#winning-side').text(match.winningSide || "none");
+    $('#mode').text(match.type);
+    $('#winner').text(match.winningSide || "none");
     $('#time').text(formatSeconds(match.time));
 
     $('#players > li').remove();

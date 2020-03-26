@@ -27,8 +27,8 @@ function reload() {
 
 function refresh() {
     if(report) {
-        $('#player-report').text(report.players);
-        $('#game-report').text(report.games.total);
+        $('#active-players-report').text(report.players);
+        $('#total-games-report').text(report.games.total);
 
         for(let type in report.games.types) {
             $(`#${type}-report`).text(report.games.types[type] || 0);

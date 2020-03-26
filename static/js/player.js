@@ -56,7 +56,7 @@ function reload() {
             data: {
                 player: name,
                 order: 'finished_des',
-                limit: 100
+                limit: 500
             },
             success: nextMatchData
         });
@@ -94,7 +94,7 @@ function refresh() {
 
     $('#color').text(player.color);
     $('#mode').text(player.mode || "");
-    $('#servers').html(player.servers.map(s => `<a href="/server?name=${s}">${s}</a>`));
+    $('#server').html(player.servers.map(s => `<a href="/server?name=${s}">${s}</a>`));
     $('#online-time').text(elapsed(player.logonTime) || 'Offline');
     $('#last-active').text(formatTime(player.lastActive));
 
@@ -153,7 +153,8 @@ function refresh() {
         count++;
     }
 
-    $('#games').text(games);
+    $('#games-played').text(games);
+
     if(!player.hidden && games > 0)
         $('#win-rate').text(`${total}/${games} (${Math.round(total/games*100)}%)`);
     else

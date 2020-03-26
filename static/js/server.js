@@ -21,17 +21,17 @@ function refresh() {
 
     if(!server) return;
     $('#name').text(server.name);
-    $('#type').text(server.type);
+    $('#mode').text(server.type);
     $('#state').text(server.state);
-    $('#observers').text(server.observers);
-    $('#run-time').text(elapsed(server.runningSince) || "Not running");
+    $('#players').text(server.observers);
+    $('#running-for').text(elapsed(server.runningSince) || "Not running");
 
-    $('#players > li').remove();
+    $('#player-list > li').remove();
 
     server.players.sort(compare('side'));
     for(let player of server.players) {
         player.name = player.name.substring(0, 20);
-        $('#players').append(`
+        $('#player-list').append(`
             <li class="list-group-item">
                 <div class="text-right float-left pr-1 w-50">
                     ${!player.ai ? `
