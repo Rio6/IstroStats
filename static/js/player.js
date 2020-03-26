@@ -155,9 +155,9 @@ function refresh() {
 
     $('#games').text(games);
     if(!player.hidden && games > 0)
-        $('#total-rate').text(`${total}/${games} (${Math.round(total/games*100)}%)`);
+        $('#win-rate').text(`${total}/${games} (${Math.round(total/games*100)}%)`);
     else
-        $('#total-rate').text("N/A");
+        $('#win-rate').text("N/A");
 
     for(let type in wins) {
         if(!player.hidden && wins[type].games > 0) {
