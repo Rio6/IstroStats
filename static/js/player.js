@@ -63,6 +63,8 @@ function reload() {
     }
 
     let newMatches = [];
+    if(matches === null) matches = newMatches;
+
     let nextMatchData = data => {
         newMatches.splice(-1, 0, ...data.matches);
 
