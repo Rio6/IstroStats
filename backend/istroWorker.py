@@ -5,7 +5,7 @@ from datetime import datetime
 
 from . import models
 from .models import PlayerModel, MatchModel, MatchPlayerModel, ServerModel, ServerPlayerModel
-from .istro_listener import IstroListener
+from .istroListener import IstroListener
 
 ISTRO_NAME = "IstroStats"
 

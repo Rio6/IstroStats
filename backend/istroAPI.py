@@ -170,7 +170,7 @@ class IstrolidAPI:
                 rst = rst.order_by(MatchModel.finished.desc())
             elif order == 'finished_asc':
                 rst = rst.order_by(MatchModel.finished.asc())
-            if order == 'time_des':
+            elif order == 'time_des':
                 rst = rst.order_by(MatchModel.time.desc())
             elif order == 'time_asc':
                 rst = rst.order_by(MatchModel.time.asc())
