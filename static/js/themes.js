@@ -4,7 +4,7 @@ $(document).ready(() => {
 
         for(let theme of data.themes) {
             $('#theme-list').append(`
-                <span class="dropdown-item external-theme" onclick="changeTheme('${theme.cssCdn}')">
+                <span class="btn dropdown-item external-theme" onclick="changeTheme('${theme.cssCdn}')">
                     ${theme.name}
                 </span>
             `);

@@ -41,15 +41,15 @@
                     Themes
                 </button>
                 <div class="dropdown-menu">
-                    <span class="dropdown-item" onclick="changeTheme(null)">
+                    <span class="btn dropdown-item" onclick="changeTheme(null)">
                         Default
                     </span>
 
                     <div id="theme-list"></div>
 
-                    <span class="dropdown-item text-muted disabled">
+                    <span class="text-muted pl-2">
                         <small>
-                            Themes from <a href="https://bootswatch.com/">Bootswatch</a>
+                            Themes from <a href="https://bootswatch.com/" target="_blank">Bootswatch</a>
                         </small>
                     </span>
                 </div>
