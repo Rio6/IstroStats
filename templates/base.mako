@@ -20,7 +20,7 @@
     <body>
 
         <%def name="navitem(title, path)">
-            % if path == page:
+            % if path == page or path == "" and page == "index":
                 <a class="nav-link active">${title}</a>
             % else:
             <a class="nav-link" href="/${path}">${title}</a>
@@ -28,7 +28,7 @@
         </%def>
 
         <nav class="nav shadow-sm">
-            % for (title, path) in (("Home", "index"), ("Players", "players"), ("Factions", "factions"), ("Servers", "servers"), ("Matches", "matches")):
+            % for (title, path) in (("Home", ""), ("Players", "players"), ("Factions", "factions"), ("Servers", "servers"), ("Matches", "matches")):
                 ${navitem(title, path)}
             % endfor
 

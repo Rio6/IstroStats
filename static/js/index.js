@@ -30,8 +30,14 @@ function refresh() {
         $('#active-players-report').text(report.players);
         $('#total-games-report').text(report.games.total);
 
-        for(let type in report.games.types) {
-            $(`#${type}-report`).text(report.games.types[type] || 0);
+        $('#reports > .type-report').remove();
+        for(let type of Object.keys(report.games.types).sort()) {
+            $(`#reports`).append(`
+                <li class="type-report list-group-item">
+                    <strong>${type}:</strong>
+                    ${report.games.types[type] || 0}
+                </li>
+            `);
         }
     }
 
