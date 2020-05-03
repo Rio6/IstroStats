@@ -1,10 +1,35 @@
-<%page args="page" />
+<%page args="page, root" />
+
+## Setting subresource integrity can force browsers to reload scripts when updated
+<%!
+    import os
+    import base64
+    import hashlib
+    cached_integrities = {}
+%>
+<%
+    def with_sri(path):
+        global cached_integrities
+        if path not in cached_integrities:
+            filepath = os.path.join(root, 'static/' + path)
+            try:
+                with open(filepath, 'rb') as file:
+                    content = file.read()
+                    integrity='sha384-' + base64.b64encode(hashlib.sha384(content).digest()).decode()
+                    cached_integrities[path] = f'"{path}" integrity="{integrity}"'
+            except Exception as e:
+                print("Error with_sri:", e)
+                cached_integrities[path] = f'"{path}"'
+
+        return cached_integrities[path]
+%>
+
 <html>
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-        <link rel="stylesheet" href="/css/sticky-footer.css">
+        <link rel="stylesheet" href=${with_sri('/css/sticky-footer.css')}>
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
         <link id="theme-css" rel="stylesheet" crossorigin="anonymous">
 
@@ -12,9 +37,9 @@
         <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
 
-        <script src="/js/utils.js"></script>
-        <script src="/js/themes.js"></script>
-        <script src="/js/${page}.js"></script>
+        <script src=${with_sri('/js/utils.js')}></script>
+        <script src=${with_sri('/js/themes.js')}></script>
+        <script src=${with_sri(f'/js/{page}.js')}></script>
         <title>IstroStats</title>
     </head>
     <body>

@@ -7,7 +7,6 @@ from decimal import Decimal
 
 import cherrypy
 
-from mako.template import Template
 from mako.exceptions import TemplateLookupException
 from mako.lookup import TemplateLookup
 
@@ -18,7 +17,7 @@ from backend import IstrolidAPI, models
 DATABASE_URL = 'sqlite:///database.db?check_same_thread=False'
 
 root = os.path.abspath(os.path.dirname(__file__))
-lookup = TemplateLookup(directories=os.path.join(root, 'templates'))
+template = TemplateLookup(directories=os.path.join(root, 'templates'), module_directory=os.path.join(root, '__pycache__'))
 
 # JSON encoder that can serialize datetime
 class DatetimeJSONEncoder(json.JSONEncoder):
@@ -70,7 +69,7 @@ class RootCtl:
     @cherrypy.expose
     def index(self, page='index', **_):
         try:
-            return lookup.get_template('base.mako').render(page=page)
+            return template.get_template('base.mako').render(page=page, root=root)
         except TemplateLookupException:
             raise cherrypy.NotFound(page)
 
