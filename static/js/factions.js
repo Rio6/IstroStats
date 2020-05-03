@@ -69,7 +69,7 @@ function refresh() {
     let {count, factions} = factionData;
 
     for(let faction of factions) {
-        $('#factions').append(`
+        $('#factions').append(e`
             <tr>
                 <td><a href="/faction?name=${faction.name}">${faction.name}</a></td>
                 <td>${faction.size}</td>
@@ -85,4 +85,3 @@ function refresh() {
 
 $(document).ready(reload);
 setInterval(refresh, 1000);
-

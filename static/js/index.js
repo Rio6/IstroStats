@@ -32,7 +32,7 @@ function refresh() {
 
         $('#reports > .type-report').remove();
         for(let type of Object.keys(report.games.types).sort()) {
-            $(`#reports`).append(`
+            $(`#reports`).append(e`
                 <li class="type-report list-group-item">
                     <strong>${type}:</strong>
                     ${report.games.types[type] || 0}
@@ -45,11 +45,13 @@ function refresh() {
         $('#player-count').text(players.length);
         $('#players > li').remove();
         for(let player of players) {
-            $('#players').append(`
+            $('#players').append(e`
                 <li class="list-group-item">
                     <a href="/player?name=${player.name}">${player.name}</a>
-                    ${player.servers.length > 0 ? player.servers.map(s => `<a href="/server?name=${s}">${s}</a>`)
-                        : (player.mode || "")}
+                 `+`${player.servers.length > 0
+                        ? player.servers.map(s => e`<a href="/server?name=${s}">${s}</a>`)
+                        : esc(player.mode || "")
+                    }
                 </li>
             `);
         }

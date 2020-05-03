@@ -34,13 +34,13 @@ function refresh() {
         $('#player-list').append(`
             <li class="list-group-item">
                 <div class="text-right float-left pr-1 w-50">
-                    ${!player.ai ? `
+                    ${!player.ai ? e`
                         <a href="/player?name=${player.name}">
                             ${player.name}
                         </a>
-                    ` : player.name}
+                    ` : esc(player.name)}
                 </div>
-                <div class="text-left float-right pl-1 w-50">
+            `+e`<div class="text-left float-right pl-1 w-50">
                     ${player.side}
                 </div>
             </li>

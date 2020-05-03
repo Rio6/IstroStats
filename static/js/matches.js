@@ -79,7 +79,7 @@ function refresh() {
     for(let field in config.filters) {
         let filters = config.filters[field]
         for(let i in filters) {
-            $('#filters').append(`
+            $('#filters').append(e`
             <div class="btn btn-info" onclick="removeFilter('${field}', ${i})">
                 ${field}=${filters[i]}
             </div>
@@ -97,17 +97,17 @@ function refresh() {
             p.name = p.name.substring(0, 20);
         });
 
-        $('#matches').append(`
+        $('#matches').append(e`
             <tr>
                 <td><a href="/match?id=${match.id}">${formatTime(match.finished)}</a></td>
                 <td><a href="/server?name=${match.server}">${match.server}</a></td>
                 <td>${match.type}</td>
                 <td>${match.winningSide || "none"}</td>
                 <td>${formatSeconds(match.time)}</td>
-                <td>${
+             `+`<td>${
                     match.players
                         .sort((a, b) => b.winner - a.winner)
-                        .map(p => p.ai ? p.name : `<a href="/player?name=${p.name}">${p.name}</a>`)
+                        .map(p => p.ai ? esc(p.name) : e`<a href="/player?name=${p.name}">${p.name}</a>`)
                 }</td>
             </tr>
         `);

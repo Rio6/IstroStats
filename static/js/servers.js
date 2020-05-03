@@ -42,7 +42,7 @@ function refresh() {
         });
 
         let runTime = elapsed(server.runningSince);
-        $('#servers').append(`
+        $('#servers').append(e`
             <tr>
                 <td><a href="/server?name=${server.name}">${server.name}</a></td>
                 <td>${server.type}</td>
@@ -51,11 +51,11 @@ function refresh() {
                 <td>
                     ${runTime || "Not running"}
                 </td>
-                <td>${
+             `+`<td>${
                     server.players
                         .filter(p => !p.ai && (p.side === 'alpha' || p.side === 'beta'))
                         .sort((a, b) => b.side - a.side)
-                        .map(p => p.ai ? p.name : `<a href="/player?name=${p.name}">${p.name}</a>`)
+                        .map(p => p.ai ? esc(p.name) : e`<a href="/player?name=${p.name}">${p.name}</a>`)
                 }</td>
             </tr>
         `);

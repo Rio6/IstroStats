@@ -57,7 +57,7 @@ function refresh() {
             });
 
         for(let player of faction.players) {
-            $('#player-list').append(`
+            $('#player-list').append(e`
                 <li class="list-group-item">
                     <div class="text-right float-left pr-1 w-50">
                         <a href="/player?name=${player.name}">
@@ -85,4 +85,3 @@ $(document).ready(() => {
 });
 
 setInterval(refresh, 1000);
-

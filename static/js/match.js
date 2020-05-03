@@ -22,7 +22,7 @@ function refresh() {
     $(document).attr('title', `${match.type} ${match.server}`);
 
     $('#finished').text(formatTime(match.finished));
-    $('#server').html(`<a href="/server?name=${match.server}">${match.server}</a>`);
+    $('#server').html(e`<a href="/server?name=${match.server}">${match.server}</a>`);
     $('#mode').text(match.type);
     $('#winner').text(match.winningSide || "none");
     $('#time').text(formatSeconds(match.time));
@@ -35,13 +35,13 @@ function refresh() {
         $('#players').append(`
             <li class="list-group-item">
                 <div class="text-right float-left pr-1 w-50">
-                    ${!player.ai ? `
+                    ${!player.ai ? e`
                         <a href="/player?name=${player.name}">
                             ${player.name}
                         </a>
-                    ` : player.name}
+                    ` : esc(player.name)}
                 </div>
-                <div class="text-left float-right pl-1 w-50">
+            `+e`<div class="text-left float-right pl-1 w-50">
                     ${player.side}
                 </div>
             </li>

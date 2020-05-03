@@ -91,13 +91,13 @@ function refresh() {
     $('#rank').text(player.rank);
 
     if(player.faction)
-        $('#faction').html(`<a href="/faction?name=${player.faction}">${player.faction}</a>`);
+        $('#faction').html(e`<a href="/faction?name=${player.faction}">${player.faction}</a>`);
     else
         $('#faction').text("");
 
     $('#color').text(player.color);
     $('#mode').text(player.mode || "");
-    $('#server').html(player.servers.map(s => `<a href="/server?name=${s}">${s}</a>`));
+    $('#server').html(player.servers.map(s => e`<a href="/server?name=${s}">${s}</a>`));
     $('#online-time').text(elapsed(player.logonTime) || 'Offline');
     $('#last-active').text(formatTime(player.lastActive));
 
@@ -135,7 +135,7 @@ function refresh() {
         }
 
         if(count <= 15) {
-            $('#matches').append(`
+            $('#matches').append(e`
                 <li class="list-group-item">
                     <div class="text-right float-left pr-1 w-50">
                         <a href="/match?id=${match.id}">

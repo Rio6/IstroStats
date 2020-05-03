@@ -40,6 +40,7 @@ function compare(field, reverse, nulls) {
     };
 }
 
+// Calls setPage(page) function when button pressed
 function addPageButton(currentPage, rowsPerPage, totalRows) {
     let pages = Math.ceil(totalRows / rowsPerPage) - 1;
 
@@ -58,11 +59,29 @@ function addPageButton(currentPage, rowsPerPage, totalRows) {
             else if(i > currentPage + 1)
                 i = pages - 1;
         } else {
-            pageBtn.append(`
+            pageBtn.append(e`
                 <li class="page-item ${i === currentPage ? 'active' : ''}" onclick="setPage(${i})">
                     <a href='#' class="page-link">${i}</a>
                 </li>
             `);
         }
     }
+}
+
+function esc(str) {
+    if(typeof(str) === 'string') {
+        return str
+            .replace(/&/g, '&amp;')
+            .replace(/>/g, '&gt;')
+            .replace(/</g, '&lt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&apos;');
+    } else {
+        return str;
+    }
+}
+
+// Tagged template function for escaped template
+function e(str, ...tags) {
+    return str.reduce((a, c, i) => a + esc(tags[i-1]) + c);
 }

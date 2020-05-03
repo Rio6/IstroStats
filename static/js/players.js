@@ -69,13 +69,13 @@ function refresh() {
     let {count, players} = playerData;
 
     for(let player of players) {
-        $('#players').append(`
+        $('#players').append(e`
             <tr>
                 <td><a href="/player?name=${player.name}">${player.name}</a></td>
-                <td>${player.faction ? `<a href="/faction?name=${player.faction}">${player.faction}</a>` : ''}</td>
-                <td>${player.rank}</td>
-                <td>${player.servers.map(s => `<a href="/server?name=${s}">${s}</a>`)}</td>
-                <td>${player.mode || ""}</td>
+             `+`<td>${player.faction ? e`<a href="/faction?name=${player.faction}">${player.faction}</a>` : ''}</td>
+            `+e`<td>${player.rank}</td>
+             `+`<td>${player.servers.map(s => e`<a href="/server?name=${s}">${s}</a>`)}</td>
+            `+e`<td>${player.mode || ""}</td>
                 <td>
                     ${elapsed(player.logonTime) || formatTime(player.lastActive)}
                 </td>
