@@ -41,31 +41,49 @@ function compare(field, reverse, nulls) {
 }
 
 // Calls setPage(page) function when button pressed
-function addPageButton(currentPage, rowsPerPage, totalRows) {
+function addPageButton(currentPage, rowsPerPage, totalRows, extraBtns=2) {
     let pages = Math.ceil(totalRows / rowsPerPage) - 1;
 
     $('#page-button > li').remove()
 
     let pageBtn = $('#page-button');
-    for(let i = 0; i <= pages; i++) {
-        if(i > 0 && i < pages && Math.abs(i-currentPage) > 1) {
-            pageBtn.append(`
-                <li class="page-item disabled">
-                    <a class="page-link">...</a>
-                </li>
-            `);
-            if(i < currentPage - 1)
-                i = currentPage - 2;
-            else if(i > currentPage + 1)
-                i = pages - 1;
-        } else {
-            pageBtn.append(e`
-                <li class="page-item ${i === currentPage ? 'active' : ''}" onclick="setPage(${i})">
-                    <a href='#' class="page-link">${i}</a>
-                </li>
-            `);
-        }
+
+    pageBtn.append(`
+        <li class="page-item" onclick="setPage(0)">
+            <a href='#' class="page-link"><</a>
+        </li>
+    `);
+
+    let numBtns = extraBtns * 2 + 1;
+    let startBtn = Math.max(Math.min(currentPage - extraBtns, pages - numBtns), 0);
+    let endBtn = Math.min(startBtn + numBtns, pages);
+    for(let i = startBtn; i <= endBtn; i++) {
+        pageBtn.append(e`
+            <li class="page-item ${i === currentPage ? 'active' : ''}" onclick="setPage(${i})">
+                <a href='#' class="page-link">${i}</a>
+            </li>
+        `);
     }
+
+    if(pages > extraBtns*2 + 1) {
+        pageBtn.append(`
+            <li class="page-item">
+                <a class="page-link" style="cursor: pointer;" onclick="(() => {
+                    let rst = prompt('Page Number');
+                    if(rst != null && !isNaN(rst)) {
+                        let page = +rst;
+                        setPage(Math.max(Math.min(page, ${pages}), 0));
+                    }
+                })()">...</a>
+            </li>
+        `);
+    }
+
+    pageBtn.append(`
+        <li class="page-item" onclick="setPage(${pages})">
+            <a href='#' class="page-link">&gt;</a>
+        </li>
+    `);
 }
 
 function esc(str) {
