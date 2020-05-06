@@ -9,8 +9,6 @@ $(document).ready(() => {
                 </span>
             `);
         }
-
-        changeTheme(localStorage['theme']);
     }});
 });
 

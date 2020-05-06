@@ -52,6 +52,7 @@
         <script src=${with_sri(f'/js/{page}.js')}></script>
         <title>IstroStats</title>
     </head>
+
     <body>
 
         <%def name="navitem(title, path)">
@@ -96,5 +97,13 @@
         <div class="footer bg-transparent text-muted text-center">
             Made by R26
         </div>
+
+        <script>
+          if(localStorage['theme']) {
+              $('body').hide();
+              $('#theme-css').attr('href', localStorage['theme']);
+              $('#theme-css').ready(() => $('body').show());
+          }
+        </script>
     </body>
 </html>
