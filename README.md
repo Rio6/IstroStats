@@ -1,5 +1,5 @@
 # IstroStats
-[Currently running on Heroku](https://istrostats.herokuapp.com)
+[Currently running on istrostats.ddns.net](http://istrostats.ddns.net/)
 
 A program that keeps track of Istrolid players, matches, and factions.
 
