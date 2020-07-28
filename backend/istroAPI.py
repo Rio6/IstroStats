@@ -264,7 +264,7 @@ class IstrolidAPI:
             .filter(PlayerModel.id == player.id))
 
         if 'type' in query:
-            rst = rst.filter(MatchModel.type.in_(_multiple(query['type'])))
+            matches = matches.filter(MatchModel.type.in_(_multiple(query['type'])))
 
         rst = {}
         for match in matches:
