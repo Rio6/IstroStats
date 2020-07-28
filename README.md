@@ -94,7 +94,7 @@ name | type | note
 name | string
 running | boolean
 type | string
-player | string | can occur multiple times
+player | string | can have multiple
 
 Example:
 ```
@@ -146,11 +146,11 @@ Get match information.
 Params:
 name | type | note
 id | number
-player | string | can occur multiple times
-winner | string | can occur multiple times
-loser | string | can accur multiple times
+player | string | can have multiple
+winner | string | can have multiple
+loser | string | can have multiple
 server | string
-type | string
+type | string | can have multiple
 order | string | one of: finished_des, finished_asc, time_des, time_asc
 offset | number | number of matches to skip in query
 limit | number | max number of matches to return
@@ -236,5 +236,34 @@ GET /api/faction/?minplayers=5&order=playercount_des
       "lastActive": 1585160420.789422
     }
   ]
+}
+```
+
+### Player Win Rates
+```
+GET /api/winrate/
+```
+Get win rates of a player
+
+Params:
+name | type | note
+--- | --- | ---
+name | string |
+type | string | can have multiple
+
+Example:
+```
+GET /api/winrate/?name=R26&type=1v1&type=2v2
+```
+```json
+{
+  "2v2": {
+    "wins": 2,
+    "games": 6
+  },
+  "1v1": {
+    "wins": 1,
+    "games": 10
+  }
 }
 ```
