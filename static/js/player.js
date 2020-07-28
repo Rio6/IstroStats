@@ -1,6 +1,14 @@
 var name = null;
 var player = null;
 var matches = null;
+var totalMatches = 0;
+var winRates = {
+    '1v1': {wins: 0, games: 0},
+    '1v1r': {wins: 0, games: 0},
+    '1v1t': {wins: 0, games: 0},
+    '2v2': {wins: 0, games: 0},
+    '3v3': {wins: 0, games: 0}
+};
 
 function rankImage(rank) {
     if (rank < 25) {
@@ -47,36 +55,29 @@ function reload() {
         },
         success: data => {
             player = data.players[0];
-
-            console.log(player);
-            if(player){
-                let sendMatchRequest = (offset=0) => {
-                    $.ajax({
-                        url: '/api/match/',
-                        data: {
-                            player: name,
-                            order: 'finished_des',
-                            limit: 500,
-                            offset: offset
-                        },
-                        success: nextMatchData
-                    });
-                }
-
-                let newMatches = [];
-                if(matches === null) matches = newMatches;
-
-                let nextMatchData = data => {
-                    newMatches.splice(-1, 0, ...data.matches);
-
-                    if(newMatches.length < data.count && newMatches.length < 2000) {
-                        sendMatchRequest(newMatches.length);
-                    } else {
-                        matches = newMatches;
+            if(player) {
+                $.ajax({
+                    url: '/api/match/',
+                    data: {
+                        player: name,
+                        order: 'finished_des',
+                        limit: 500,
+                    },
+                    success: data => {
+                        matches = data.matches;
+                        totalMatches = data.count;
                     }
-                };
-
-                sendMatchRequest();
+                });
+                $.ajax({
+                    url: '/api/winrate/',
+                    data: {
+                        name: name,
+                        type: Object.keys(winRates),
+                    },
+                    success: data => {
+                        winRates = data;
+                    }
+                });
             }
         }
     });
@@ -108,74 +109,51 @@ function refresh() {
 
     $('#matches > li').remove();
 
-    let total = 0, games = 0, count = 0;
-    let wins = {
-        '1v1': {wins: 0, games: 0},
-        '1v1r': {wins: 0, games: 0},
-        '1v1t': {wins: 0, games: 0},
-        '2v2': {wins: 0, games: 0},
-        '3v3': {wins: 0, games: 0}
-    };
-
     if(!matches) return;
     for(let match of matches) {
 
         let matchPlayer = match.players.find(p => p.name == name);
         if(!matchPlayer) continue;
 
-        if(match.winningSide && match.type in wins) {
-            if(!player.hidden) {
-                for(let type in wins) {
-                    if(match.type === type) {
-                        if(matchPlayer.winner)
-                            wins[type].wins++;
-                        wins[type].games++;
-                    }
-                }
-
-                if(matchPlayer.winner)
-                    total++;
-            }
-            games++;
-        }
-
-        if(count <= 15) {
-            $('#matches').append(e`
-                <li class="list-group-item">
-                    <div class="text-right float-left pr-1 w-50">
-                        <a href="/match?id=${match.id}">
-                            ${formatTime(match.finished)}
-                        </a>
-                    </div>
-                    <div class="text-left float-right pl-1 w-50">
-                        ${match.type}
-                        <a href="/server?name=${match.server}">
-                            ${match.server}
-                        </a>
-                        ${match.winningSide ? matchPlayer.winner ? "won" : "lost" : "draw"}
-                    </div>
-                </li>
-            `);
-        }
-
-        count++;
+        $('#matches').append(e`
+            <li class="list-group-item">
+                <div class="text-right float-left pr-1 w-50">
+                    <a href="/match?id=${match.id}">
+                        ${formatTime(match.finished)}
+                    </a>
+                </div>
+                <div class="text-left float-right pl-1 w-50">
+                    ${match.type}
+                    <a href="/server?name=${match.server}">
+                        ${match.server}
+                    </a>
+                    ${match.winningSide ? matchPlayer.winner ? "won" : "lost" : "draw"}
+                </div>
+            </li>
+        `);
     }
 
-    $('#games-played').text(games);
+    $('#games-played').text(totalMatches);
 
-    if(!player.hidden && games > 0)
-        $('#win-rate').text(`${total}/${games} (${Math.round(total/games*100)}%)`);
-    else
-        $('#win-rate').text("N/A");
+    let totalWins = 0, totalGames = 0;
+    for(let type in winRates) {
+        let wins = winRates[type].wins;
+        let games = winRates[type].games;
 
-    for(let type in wins) {
-        if(!player.hidden && wins[type].games > 0) {
-            let wins2 = wins[type].wins, games = wins[type].games;
-            $(`#${type}-rate`).text(`${wins2}/${games} (${Math.round(wins2/games*100)}%)`);
+        totalWins += wins;
+        totalGames += games;
+
+        if(!player.hidden && winRates[type].games > 0) {
+            $(`#${type}-rate`).text(`${wins}/${games} (${Math.round(wins/games*100)}%)`);
         } else {
             $(`#${type}-rate`).text("N/A");
         }
     }
+
+    if(!player.hidden && totalGames > 0)
+        $('#win-rate').text(`${totalWins}/${totalGames} (${Math.round(totalWins/totalGames*100)}%)`);
+    else
+        $('#win-rate').text("N/A");
 }
 
 $(document).ready(() => {

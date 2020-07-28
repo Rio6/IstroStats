@@ -246,6 +246,44 @@ class IstrolidAPI:
             } for r in rst]
         }
 
+    def getPlayerWinRate(self, **query):
+        if 'name' not in query:
+            return {}
+
+        name = _single(query['name'])
+        player = (models.session.query(PlayerModel)
+            .filter(PlayerModel.name == name)
+            .first())
+
+        if player is None:
+            return {}
+
+        matches = (models.session.query(MatchModel)
+            .join(MatchPlayerModel)
+            .join(PlayerModel)
+            .filter(PlayerModel.id == player.id))
+
+        if 'type' in query:
+            rst = rst.filter(MatchModel.type.in_(_multiple(query['type'])))
+
+        rst = {}
+        for match in matches:
+            matchRst = rst.setdefault(match.type, {
+                'wins': 0,
+                'games': 0
+            })
+
+            if (models.session.query(MatchPlayerModel)
+                    .filter(MatchPlayerModel.playerId == player.id)
+                    .filter(MatchPlayerModel.matchId == match.id)
+                    .filter(MatchPlayerModel.side == match.winningSide)
+                    .first()) is not None:
+                matchRst['wins'] += 1
+
+            matchRst['games'] += 1
+
+        return rst
+
     def _playerToInfo(self, player):
         servers = [rst[0] for rst in (models.session.query(ServerModel.name)
             .join(ServerPlayerModel).filter(ServerPlayerModel.playerId == player.id))]

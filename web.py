@@ -61,6 +61,10 @@ class APICtl:
     def report(self, **kwargs):
         return self.istro.report(**kwargs)
 
+    @cherrypy.expose
+    def winrate(self, **kwargs):
+        return self.istro.getPlayerWinRate(**kwargs)
+
 @cherrypy.popargs('page')
 class RootCtl:
     def __init__(self):
