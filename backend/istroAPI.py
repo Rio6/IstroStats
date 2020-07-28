@@ -250,34 +250,23 @@ class IstrolidAPI:
         if 'name' not in query:
             return {}
 
-        name = _single(query['name'])
-        player = (models.session.query(PlayerModel)
-            .filter(PlayerModel.name == name)
-            .first())
-
-        if player is None:
-            return {}
-
-        matches = (models.session.query(MatchModel)
+        matchPlayers = (models.session.query(MatchModel, MatchPlayerModel)
             .join(MatchPlayerModel)
             .join(PlayerModel)
-            .filter(PlayerModel.id == player.id))
+            .filter(PlayerModel.name == _single(query['name'])))
 
         if 'type' in query:
-            matches = matches.filter(MatchModel.type.in_(_multiple(query['type'])))
+            print(query['type'])
+            matchPlayers = matchPlayers.filter(MatchModel.type.in_(_multiple(query['type'])))
 
         rst = {}
-        for match in matches:
+        for match, player in matchPlayers:
             matchRst = rst.setdefault(match.type, {
                 'wins': 0,
                 'games': 0
             })
 
-            if (models.session.query(MatchPlayerModel)
-                    .filter(MatchPlayerModel.playerId == player.id)
-                    .filter(MatchPlayerModel.matchId == match.id)
-                    .filter(MatchPlayerModel.side == match.winningSide)
-                    .first()) is not None:
+            if match.winningSide == player.side:
                 matchRst['wins'] += 1
 
             matchRst['games'] += 1
