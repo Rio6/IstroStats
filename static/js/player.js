@@ -61,7 +61,7 @@ function reload() {
                     data: {
                         player: name,
                         order: 'finished_des',
-                        limit: 500,
+                        limit: 15,
                     },
                     success: data => {
                         matches = data.matches;
