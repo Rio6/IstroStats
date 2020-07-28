@@ -75,7 +75,7 @@ function reload() {
                         type: Object.keys(winRates),
                     },
                     success: data => {
-                        winRates = data;
+                        Object.assign(winRates, data);
                     }
                 });
             }
