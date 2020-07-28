@@ -90,6 +90,8 @@ function refresh() {
     $('#rank-img').css('background-color', player.color).removeClass('invisible');
     if(player.rank > 0)
         $('#rank-img').attr('src', 'http://www.istrolid.com/img/ui/rank/' + rankImage(player.rank));
+    else
+        $('#rank-img').attr('src', 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7');
 
     $('#rank').text(player.rank);
 
