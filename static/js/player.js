@@ -47,36 +47,39 @@ function reload() {
         },
         success: data => {
             player = data.players[0];
+
+            console.log(player);
+            if(player){
+                let sendMatchRequest = (offset=0) => {
+                    $.ajax({
+                        url: '/api/match/',
+                        data: {
+                            player: name,
+                            order: 'finished_des',
+                            limit: 500,
+                            offset: offset
+                        },
+                        success: nextMatchData
+                    });
+                }
+
+                let newMatches = [];
+                if(matches === null) matches = newMatches;
+
+                let nextMatchData = data => {
+                    newMatches.splice(-1, 0, ...data.matches);
+
+                    if(newMatches.length < data.count && newMatches.length < 2000) {
+                        sendMatchRequest(newMatches.length);
+                    } else {
+                        matches = newMatches;
+                    }
+                };
+
+                sendMatchRequest();
+            }
         }
     });
-
-    let sendMatchRequest = (offset=0) => {
-        $.ajax({
-            url: '/api/match/',
-            data: {
-                player: name,
-                order: 'finished_des',
-                limit: 100,
-                offset: offset
-            },
-            success: nextMatchData
-        });
-    }
-
-    let newMatches = [];
-    if(matches === null) matches = newMatches;
-
-    let nextMatchData = data => {
-        newMatches.splice(-1, 0, ...data.matches);
-
-        if(newMatches.length < data.count) {
-            sendMatchRequest(newMatches.length);
-        } else {
-            matches = newMatches;
-        }
-    };
-
-    sendMatchRequest();
 }
 
 function refresh() {

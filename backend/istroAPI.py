@@ -100,7 +100,8 @@ class IstrolidAPI:
         count = rst.count()
 
         rst = rst.offset(_single(query.get('offset', 0)))
-        rst = rst.limit(_single(query.get('limit', 50)))
+        limit = int(_single(query.get('limit', 50)))
+        rst = rst.limit(min(limit, 500))
 
         return {
             'count': count,
@@ -178,7 +179,8 @@ class IstrolidAPI:
         count = rst.count()
 
         rst = rst.offset(_single(query.get('offset', 0)))
-        rst = rst.limit(_single(query.get('limit', 50)))
+        limit = int(_single(query.get('limit', 50)))
+        rst = rst.limit(min(limit, 500))
 
         return {
             'count': count,
@@ -230,7 +232,8 @@ class IstrolidAPI:
         count = rst.count()
 
         rst = rst.offset(_single(query.get('offset', 0)))
-        rst = rst.limit(_single(query.get('limit', 50)))
+        limit = int(_single(query.get('limit', 50)))
+        rst = rst.limit(min(limit, 500))
 
 
         return {
