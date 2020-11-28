@@ -97,40 +97,43 @@ class IstrolidWorker:
     def _onServersDiff(self, diff):
         for name, serverInfo in diff.items():
 
-            if serverInfo is None:
-                # server offline
-                models.session.query(ServerModel).filter_by(name=name).delete(synchronize_session='fetch')
+            try:
+                if serverInfo is None:
+                    # server offline
+                    models.session.query(ServerModel).filter_by(name=name).delete(synchronize_session='fetch')
 
-            else:
-                server = models.get_or_create(ServerModel, name=name)
+                else:
+                    server = models.get_or_create(ServerModel, name=name)
 
-                if 'players' in serverInfo:
+                    if 'players' in serverInfo:
 
-                    def playerInfos():
-                        playerInfos = serverInfo['players']
-                        for info in playerInfos:
-                            player = self._getPlayer(info['name'], info['ai'], updateOnline=False, create=True)
-                            serverPlayer = models.get_or_create(ServerPlayerModel, serverId=server.id, playerId=player.id)
-                            serverPlayer.side = info['side']
-                            yield serverPlayer
+                        def playerInfos():
+                            playerInfos = serverInfo['players']
+                            for info in playerInfos:
+                                player = self._getPlayer(info['name'], info['ai'], updateOnline=False, create=True)
+                                serverPlayer = models.get_or_create(ServerPlayerModel, serverId=server.id, playerId=player.id)
+                                serverPlayer.side = info['side']
+                                yield serverPlayer
 
-                    server.players = [p for p in playerInfos()]
+                        server.players = [p for p in playerInfos()]
 
-                if 'state' in serverInfo:
-                    state = serverInfo['state']
-                    # Record running time when state changes
-                    if state != server.state:
-                        if state == 'running':
-                            server.runningSince = datetime.utcnow()
-                        else:
-                            server.runningSince = None
-                    server.state = state
+                    if 'state' in serverInfo:
+                        state = serverInfo['state']
+                        # Record running time when state changes
+                        if state != server.state:
+                            if state == 'running':
+                                server.runningSince = datetime.utcnow()
+                            else:
+                                server.runningSince = None
+                        server.state = state
 
-                server.observers = serverInfo.get('observers', server.observers)
-                server.hidden = serverInfo.get('hidden', server.hidden)
-                server.type = serverInfo.get('type', server.type)
+                    server.observers = serverInfo.get('observers', server.observers)
+                    server.hidden = serverInfo.get('hidden', server.hidden)
+                    server.type = serverInfo.get('type', server.type)
 
-            models.session.commit()
+                models.session.commit()
+            except:
+                models.session.rollback()
 
     def _onGameReport(self, report):
         try:
