@@ -1,5 +1,5 @@
 # IstroStats
-[Currently running on istrostats.ddns.net](http://istrostats.ddns.net/)
+Currently running on [istrostats.r26.me](http://istrostats.r26.me)
 
 A program that keeps track of Istrolid players, matches, and factions.
 
