@@ -6,6 +6,7 @@ import json
 from decimal import Decimal
 
 import cherrypy
+import cherrypy_cors
 
 from mako.exceptions import TemplateLookupException
 from mako.lookup import TemplateLookup
@@ -82,6 +83,7 @@ def main():
     models.init_models(engine)
 
     # web server
+    cherrypy_cors.install()
     cherrypy.config.update({
         'global': {
             'server.socket_host': '0.0.0.0',
@@ -94,6 +96,7 @@ def main():
         '/': {
             'tools.staticdir.on': True,
             'tools.staticdir.dir': os.path.join(root, 'static'),
+            'cors.expose.on': True,
         }
     })
     cherrypy.engine.start()
