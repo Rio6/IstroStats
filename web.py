@@ -96,7 +96,7 @@ def main():
         '/': {
             'tools.staticdir.on': True,
             'tools.staticdir.dir': os.path.join(root, 'static'),
-            'cors.expose.on': True,
+            'cors.expose_public.on': True,
         }
     })
     cherrypy.engine.start()
