@@ -1,6 +1,6 @@
 #!/bin/sh
 export PORT=8000
-source env/bin/activate
+source venv/bin/activate
 python worker.py &
 pid=$!
 python web.py
