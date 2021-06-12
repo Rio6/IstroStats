@@ -59,10 +59,6 @@
             % endfor
 
             <span class="dropdown ml-auto mr-1">
-                <a class="mt-1 mr-1 h-75" target="_blank" href="https://www.patreon.com/user?u=32408791">
-                    Help to run the server
-                </a>
-
                 <button class="btn dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     Themes
                 </button>
