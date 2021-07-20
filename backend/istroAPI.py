@@ -81,21 +81,21 @@ class IstrolidAPI:
         if 'order' in query:
             order = _single(query['order'])
             if order == 'rank_des':
-                rst = rst.order_by(PlayerModel.rank.desc())
+                rst = rst.order_by(PlayerModel.rank.desc(), PlayerModel.id.asc())
             elif order == 'rank_asc':
-                rst = rst.order_by(PlayerModel.rank.asc())
+                rst = rst.order_by(PlayerModel.rank.asc(), PlayerModel.id.asc())
             elif order == 'name_des':
-                rst = rst.order_by(PlayerModel.name.desc())
+                rst = rst.order_by(PlayerModel.name.desc(), PlayerModel.id.asc())
             elif order == 'name_asc':
-                rst = rst.order_by(PlayerModel.name.asc())
+                rst = rst.order_by(PlayerModel.name.asc(), PlayerModel.id.asc())
             elif order == 'faction_des':
-                rst = rst.order_by(PlayerModel.faction.desc())
+                rst = rst.order_by(PlayerModel.faction.desc(), PlayerModel.id.asc())
             elif order == 'faction_asc':
-                rst = rst.order_by(PlayerModel.faction.asc())
+                rst = rst.order_by(PlayerModel.faction.asc(), PlayerModel.id.asc())
             elif order == 'logon_des':
-                rst = rst.order_by(PlayerModel.logonTime.asc().nullslast(), PlayerModel.lastActive.desc())
+                rst = rst.order_by(PlayerModel.logonTime.asc().nullslast(), PlayerModel.lastActive.desc(), PlayerModel.id.asc())
             elif order == 'logon_asc':
-                rst = rst.order_by(PlayerModel.logonTime.desc().nullsfirst(), PlayerModel.lastActive.asc())
+                rst = rst.order_by(PlayerModel.logonTime.desc().nullsfirst(), PlayerModel.lastActive.asc(), PlayerModel.id.asc())
 
         count = rst.count()
 
@@ -168,13 +168,13 @@ class IstrolidAPI:
         if 'order' in query:
             order = _single(query['order'])
             if order == 'finished_des':
-                rst = rst.order_by(MatchModel.finished.desc())
+                rst = rst.order_by(MatchModel.finished.desc(), MatchModel.id.asc())
             elif order == 'finished_asc':
-                rst = rst.order_by(MatchModel.finished.asc())
+                rst = rst.order_by(MatchModel.finished.asc(), MatchModel.id.asc())
             elif order == 'time_des':
-                rst = rst.order_by(MatchModel.time.desc())
+                rst = rst.order_by(MatchModel.time.desc(), MatchModel.id.asc())
             elif order == 'time_asc':
-                rst = rst.order_by(MatchModel.time.asc())
+                rst = rst.order_by(MatchModel.time.asc(), MatchModel.id.asc())
 
         count = rst.count()
 
