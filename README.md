@@ -13,6 +13,7 @@ GET /api/report/
 Get player and game counts within a certain time from now. Default is 1 day.
 
 Params:
+
 name | type
 --- | ---
 minutes | number
@@ -46,6 +47,7 @@ GET /api/player/
 Get player information.
 
 Params:
+
 name | type | note
 --- | --- | ---
 name | string | exact player name
@@ -89,6 +91,7 @@ GET /api/server/
 Get server information.
 
 Params:
+
 name | type | note
 --- | --- | ---
 name | string
@@ -144,7 +147,9 @@ GET /api/match/
 Get match information.
 
 Params:
+
 name | type | note
+--- | --- | ---
 id | number
 player | string | can have multiple
 winner | string | can have multiple
@@ -196,6 +201,7 @@ GET /api/faction/
 Get faction information.
 
 Params:
+
 name | type | note
 --- | --- | ---
 name | string | exact faction name
@@ -246,6 +252,7 @@ GET /api/winrate/
 Get win rates of a player
 
 Params:
+
 name | type | note
 --- | --- | ---
 name | string |
