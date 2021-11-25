@@ -273,6 +273,33 @@ class IstrolidAPI:
 
         return rst
 
+    def getActiveFactions(self, **query):
+        after = datetime.datetime.utcnow() - datetime.timedelta(weeks=4)
+        rst = (models.session.query(PlayerModel)
+                .with_entities(
+                    PlayerModel.faction,
+                    func.count(PlayerModel.id),
+                    func.max(PlayerModel.lastActive))
+                .filter(PlayerModel.faction != None, PlayerModel.faction != '')
+                .filter(PlayerModel.lastActive > after)
+                .group_by(PlayerModel.faction)
+                .order_by(func.count(PlayerModel.id).desc(), func.max(PlayerModel.rank).desc()))
+
+        if 'exclude' in query:
+            excludes = _multiple(query['exclude'])
+            rst = rst.filter(~PlayerModel.faction.in_(excludes))
+
+        count = rst.count()
+
+        rst = rst.offset(_single(query.get('offset', 0)))
+        limit = int(_single(query.get('limit', 50)))
+        rst = rst.limit(min(limit, 500))
+
+        return {
+            'count': count,
+            'factions': {r[0]: r[1] for r in rst}
+        }
+
     def _playerToInfo(self, player):
         servers = [rst[0] for rst in (models.session.query(ServerModel.name)
             .join(ServerPlayerModel).filter(ServerPlayerModel.playerId == player.id))]

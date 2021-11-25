@@ -66,6 +66,10 @@ class APICtl:
     def winrate(self, **kwargs):
         return self.istro.getPlayerWinRate(**kwargs)
 
+    @cherrypy.expose
+    def activefactions(self, **kwargs):
+        return self.istro.getActiveFactions(**kwargs)
+
 @cherrypy.popargs('page')
 class RootCtl:
     def __init__(self):
