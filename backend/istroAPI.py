@@ -24,22 +24,7 @@ def _multiple(x):
 class IstrolidAPI:
 
     def report(self, **time):
-
-        try:
-            time = datetime.timedelta(
-                minutes = float(time.get('minutes', 0)),
-                hours   = float(time.get('hours', 0)),
-                days    = float(time.get('days', 0)),
-                weeks   = float(time.get('weeks', 0)))
-
-            if time.total_seconds() <= 0:
-                time = datetime.timedelta(days=1)
-
-        except ValueError:
-            time = datetime.timedelta(days=1)
-
-        lastday = datetime.datetime.utcnow() - time
-
+        lastday = self._parseTime(time, days=1)
         playerCount = models.session.query(PlayerModel).filter(PlayerModel.lastActive > lastday).count()
         gameCount = {
             'total': 0,
@@ -274,7 +259,7 @@ class IstrolidAPI:
         return rst
 
     def getActiveFactions(self, **query):
-        after = datetime.datetime.utcnow() - datetime.timedelta(weeks=4)
+        after = self._parseTime(query, weeks=4)
         rst = (models.session.query(PlayerModel)
                 .with_entities(
                     PlayerModel.faction,
@@ -361,3 +346,19 @@ class IstrolidAPI:
             'time': match.time,
             'players': players
         }
+
+    def _parseTime(self, query, **default):
+        try:
+            time = datetime.timedelta(
+                minutes = float(query.get('minutes', 0)),
+                hours   = float(query.get('hours', 0)),
+                days    = float(query.get('days', 0)),
+                weeks   = float(query.get('weeks', 0)))
+
+            if time.total_seconds() <= 0:
+                time = datetime.timedelta(**default)
+
+        except ValueError:
+            time = datetime.timedelta(**default)
+
+        return datetime.datetime.utcnow() - time
