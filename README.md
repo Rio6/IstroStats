@@ -274,3 +274,39 @@ GET /api/winrate/?name=R26&type=1v1&type=2v2
   }
 }
 ```
+
+
+### Active Factions
+```
+GET /api/activefactions/
+```
+Get a list of factions ordered by amount of players online during the time frame and their rank.
+
+Params:
+
+name | type | note
+--- | --- | ---
+exclude | string |
+minutes | number |
+hours | number |
+days | number  |
+weeks | number | default 4
+offset | number | number of factions to skip when returning
+limit | number | maximum number of factions to return, default to 50
+
+Example:
+```
+GET /api/activefactions?weeks=1
+```
+```json
+{
+  "count": 114,
+  "factions": {
+    "CNCR": 11,
+    "ELYS": 7,
+    "EVO": 4,
+    "CURE": 4,
+    "CAKE": 4
+  }
+}
+```
