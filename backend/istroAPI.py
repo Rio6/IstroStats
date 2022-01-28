@@ -21,6 +21,9 @@ def _multiple(x):
     else:
         return [x]
 
+def _clamp(x, a, b=float('inf')):
+    return min(max(int(x), a), b)
+
 class IstrolidAPI:
 
     def report(self, **time):
@@ -84,9 +87,9 @@ class IstrolidAPI:
 
         count = rst.count()
 
-        rst = rst.offset(_single(query.get('offset', 0)))
+        rst = rst.offset(_clamp(_single(query.get('offset', 0)), 0))
         limit = int(_single(query.get('limit', 50)))
-        rst = rst.limit(min(limit, 500))
+        rst = rst.limit(_clamp(limit, 0, 500))
 
         return {
             'count': count,
@@ -163,9 +166,9 @@ class IstrolidAPI:
 
         count = rst.count()
 
-        rst = rst.offset(_single(query.get('offset', 0)))
+        rst = rst.offset(_clamp(_single(query.get('offset', 0)), 0))
         limit = int(_single(query.get('limit', 50)))
-        rst = rst.limit(min(limit, 500))
+        rst = rst.limit(_clamp(limit, 0, 500))
 
         return {
             'count': count,
@@ -216,9 +219,9 @@ class IstrolidAPI:
 
         count = rst.count()
 
-        rst = rst.offset(_single(query.get('offset', 0)))
+        rst = rst.offset(_clamp(_single(query.get('offset', 0)), 0))
         limit = int(_single(query.get('limit', 50)))
-        rst = rst.limit(min(limit, 500))
+        rst = rst.limit(_clamp(limit, 0, 500))
 
 
         return {
@@ -276,9 +279,9 @@ class IstrolidAPI:
 
         count = rst.count()
 
-        rst = rst.offset(_single(query.get('offset', 0)))
+        rst = rst.offset(_clamp(_single(query.get('offset', 0)), 0))
         limit = int(_single(query.get('limit', 50)))
-        rst = rst.limit(min(limit, 500))
+        rst = rst.limit(_clamp(limit, 0, 500))
 
         return {
             'count': count,
