@@ -48,7 +48,7 @@ class IstrolidAPI:
         rst = models.session.query(PlayerModel)
 
         if 'name' in query:
-            rst = rst.filter_by(name=_single(query['name']))
+            rst = rst.filter(PlayerModel.name.in_(_multiple(query['name'])))
 
         if 'online' in query:
             if _bool(_single(query['online'])):

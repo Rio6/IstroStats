@@ -50,7 +50,7 @@ Params:
 
 name | type | note
 --- | --- | ---
-name | string | exact player name
+name | string | exact player name, can have multiple
 online | boolean
 ai | boolean
 search | string | search for substring in player names
