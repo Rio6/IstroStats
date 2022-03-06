@@ -1,7 +1,7 @@
 import datetime
 import logging
 
-from sqlalchemy.sql.expression import func
+from sqlalchemy.sql.expression import func, or_
 from . import models
 from .models import PlayerModel, MatchModel, MatchPlayerModel, ServerModel, ServerPlayerModel
 
@@ -151,7 +151,7 @@ class IstrolidAPI:
             rst = rst.filter(MatchModel.server.in_(_multiple(query['server'])))
 
         if 'type' in query:
-            rst = rst.filter(MatchModel.type.in_(_multiple(query['type'])))
+            rst = rst.filter(or_(MatchModel.type.ilike(search) for search in _multiple(query['type'])))
 
         if 'order' in query:
             order = _single(query['order'])
