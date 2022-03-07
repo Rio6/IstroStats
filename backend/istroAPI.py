@@ -148,7 +148,7 @@ class IstrolidAPI:
                     .filter(MatchPlayerModel.winner == False))
 
         if 'server' in query:
-            rst = rst.filter(MatchModel.server.in_(_multiple(query['server'])))
+            rst = rst.filter(or_(MatchModel.server.ilike(search) for search in _multiple(query['server'])))
 
         if 'type' in query:
             rst = rst.filter(or_(MatchModel.type.ilike(search) for search in _multiple(query['type'])))
