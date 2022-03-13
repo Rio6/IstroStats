@@ -104,10 +104,11 @@ function refresh() {
                 <td>${match.type}</td>
                 <td>${match.winningSide || "none"}</td>
                 <td>${formatSeconds(match.time)}</td>
-             `+`<td>${
+             `+`<td class="text-break">${
                     match.players
                         .sort((a, b) => b.winner - a.winner)
                         .map(p => p.ai ? esc(p.name) : e`<a href="/player?name=${p.name}">${p.name}</a>`)
+                        .join(', ')
                 }</td>
             </tr>
         `);
