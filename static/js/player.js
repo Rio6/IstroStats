@@ -89,10 +89,13 @@ function refresh() {
     if(!player) return;
 
     $('#rank-img').css('background-color', player.color).removeClass('invisible');
-    if(player.rank > 0)
-        $('#rank-img').attr('src', 'http://www.istrolid.com/img/ui/rank/' + rankImage(player.rank));
-    else
-        $('#rank-img').attr('src', 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7');
+    $('#rank-img').attr('src', (i, src) => {
+        const newSrc = player.rank > 0
+            ? 'http://www.istrolid.com/img/ui/rank/' + rankImage(player.rank)
+            :'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+        if(src !== newSrc) return newSrc;
+        // else do nothing
+    });
 
     $('#rank').text(player.rank);
 
