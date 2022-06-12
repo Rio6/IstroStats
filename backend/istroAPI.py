@@ -81,9 +81,9 @@ class IstrolidAPI:
             elif order == 'faction_asc':
                 rst = rst.order_by(PlayerModel.faction.asc(), PlayerModel.id.asc())
             elif order == 'logon_des':
-                rst = rst.order_by(PlayerModel.logonTime.asc().nullslast(), PlayerModel.lastActive.desc(), PlayerModel.id.asc())
+                rst = rst.order_by(PlayerModel.logonTime.asc().nullslast(), PlayerModel.lastActive.desc().nullslast(), PlayerModel.id.asc())
             elif order == 'logon_asc':
-                rst = rst.order_by(PlayerModel.logonTime.desc().nullsfirst(), PlayerModel.lastActive.asc(), PlayerModel.id.asc())
+                rst = rst.order_by(PlayerModel.logonTime.desc().nullsfirst(), PlayerModel.lastActive.asc().nullslast(), PlayerModel.id.asc())
 
         count = rst.count()
 
