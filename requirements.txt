@@ -1,6 +1,6 @@
 alembic==1.4.2
 cheroot==8.3.0
-CherryPy==18.5.0
+CherryPy==18.8.0
 cherrypy-cors==1.6
 entrypoints==0.3
 httpagentparser==1.9.1
