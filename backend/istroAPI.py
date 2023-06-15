@@ -34,7 +34,9 @@ class IstrolidAPI:
             'types': {}
         }
 
-        games = models.session.query(MatchModel).filter(MatchModel.finished > lastday)
+        games = models.session.query(MatchModel)
+        games = games.offset(_clamp(_single(time.get('offset', 0)), 0))
+        games = games.filter(MatchModel.finished > lastday)
         gameCount['total'] = games.count()
         for game in games:
             gameCount['types'][game.type] = gameCount['types'].get(game.type, 0) + 1
