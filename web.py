@@ -90,10 +90,13 @@ def main():
     cherrypy_cors.install()
     cherrypy.config.update({
         'global': {
+            'environment': os.environ.get('ENVIRONMENT'),
             'server.socket_host': '0.0.0.0',
             'server.socket_port': int(os.environ.get('PORT', 8000)),
+            'tools.proxy.on': True,
+            'tools.proxy.base': os.environ.get('HOST'),
             'request.show_tracebacks': False,
-            'tools.json_out.handler': json_handler
+            'tools.json_out.handler': json_handler,
         }
     })
     cherrypy.tree.mount(RootCtl(), '/', config={
