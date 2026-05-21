@@ -6,7 +6,7 @@ import websocket
 from pymitter import EventEmitter
 
 class IstroListener(EventEmitter):
-    def __init__(self, email, token, login=False, root_address="ws://198.199.109.223:88"):
+    def __init__(self, email, token, login=False, root_address="wss://root.istrolid.com"):
         super().__init__()
         self.root_address = root_address
         self.email = email
